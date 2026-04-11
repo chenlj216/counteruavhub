@@ -165,16 +165,10 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
         </div>
         <div className="mt-4 pt-4 border-t border-red-100 flex flex-wrap gap-3">
           <Link
-            href={`/tools/js-ratio-calculator?drone=${drone.id}`}
+            href={`/tools/jammer-calculator?drone=${drone.id}`}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-700 bg-white border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors"
           >
-            Analyze J/S Ratio →
-          </Link>
-          <Link
-            href={`/tools/jammer-range-calculator?drone=${drone.id}`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-700 bg-white border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors"
-          >
-            Calculate Jammer Range →
+            Analyze Jamming Effectiveness →
           </Link>
         </div>
       </div>

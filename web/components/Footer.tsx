@@ -17,8 +17,7 @@ export default function Footer() {
             <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Tools</h4>
             <ul className="space-y-2 text-sm text-gray-500">
               <li><Link href="/tools/drone-frequency-database" className="hover:text-blue-600">Drone Signal Database</Link></li>
-              <li><Link href="/tools/jammer-range-calculator" className="hover:text-blue-600">Jammer Range Calculator</Link></li>
-              <li><Link href="/tools/js-ratio-calculator" className="hover:text-blue-600">J/S Ratio Calculator</Link></li>
+              <li><Link href="/tools/jammer-calculator" className="hover:text-blue-600">Jammer Effectiveness Calculator</Link></li>
               <li><Link href="/tools/rf-detection-range" className="hover:text-blue-600">RF Detection Range</Link></li>
               <li><Link href="/tools/fspl-calculator" className="hover:text-blue-600">FSPL Calculator</Link></li>
             </ul>

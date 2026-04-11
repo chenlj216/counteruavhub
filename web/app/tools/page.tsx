@@ -24,22 +24,13 @@ const tools = [
     icon: '📡',
   },
   {
-    href: '/tools/jammer-range-calculator',
-    title: 'Jammer Effective Range Calculator',
+    href: '/tools/jammer-calculator',
+    title: 'Jammer Effectiveness Calculator',
     description:
-      'Compute the maximum distance at which a jammer achieves sufficient field strength to disrupt drone communications, based on output power, antenna gain, and frequency.',
+      'Unified J/S ratio and effective range analysis. Enter the scenario geometry to get both the jamming ratio at your current position and the maximum range at which jamming succeeds. Includes FHSS bandwidth penalty.',
     badge: 'Calculator',
     badgeColor: 'bg-red-100 text-red-800',
     icon: '⚡',
-  },
-  {
-    href: '/tools/js-ratio-calculator',
-    title: 'Jamming-to-Signal (J/S) Ratio Calculator',
-    description:
-      'Evaluate whether a jammer has sufficient power advantage over the drone\'s control link at a given geometry. J/S ≥ 0 dB is required for effective jamming.',
-    badge: 'Calculator',
-    badgeColor: 'bg-red-100 text-red-800',
-    icon: '📊',
   },
   {
     href: '/tools/rf-detection-range',
