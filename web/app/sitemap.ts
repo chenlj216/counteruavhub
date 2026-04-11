@@ -23,5 +23,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...static_pages, ...blog_pages]
+  const drone_pages: MetadataRoute.Sitemap = drones.map((d) => ({
+    url: `${base}/drones/${d.id}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }))
+
+  return [...static_pages, ...blog_pages, ...drone_pages]
 }
