@@ -38,12 +38,14 @@ export default function JSRatioCalculatorPage() {
   const [jPow, setJPow] = useState<string>('10')
   const [jGain, setJGain] = useState<string>('6')
   const [jDist, setJDist] = useState<string>('500')
+  const [jBW, setJBW] = useState<string>('80')
 
   // GCS (signal source)
   const [sPow, setSPow] = useState<string>('0.1')
   const [sGain, setSGain] = useState<string>('2')
   const [sDist, setSDist] = useState<string>('2000')
   const [sFreq, setSFreq] = useState<string>('2400')
+  const [droneBW, setDroneBW] = useState<string>('2')
 
   const selectedDrone = drones.find((d) => d.id === selectedDroneId) ?? null
 
@@ -55,6 +57,7 @@ export default function JSRatioCalculatorPage() {
     setSPow(String(dbmToW(drone.gcsTxPowerDbm).toFixed(4)))
     setSGain('2')  // typical GCS omni antenna
     setSFreq(String(drone.controlFreqMHz[0]))
+    setDroneBW(String(drone.controlChannelBW_MHz))
   }
 
   function selectBand(idx: number) {
@@ -65,9 +68,15 @@ export default function JSRatioCalculatorPage() {
 
   const jp = parseFloat(jPow), jg = parseFloat(jGain), jd = parseFloat(jDist)
   const sp = parseFloat(sPow), sg = parseFloat(sGain), sd = parseFloat(sDist)
-  const valid = [jp, jg, jd, sp, sg, sd].every((v) => !isNaN(v)) && jp > 0 && sp > 0 && jd > 0 && sd > 0
+  const jbw = parseFloat(jBW), dbw = parseFloat(droneBW)
+  const valid = [jp, jg, jd, sp, sg, sd, jbw, dbw].every((v) => !isNaN(v)) && jp > 0 && sp > 0 && jd > 0 && sd > 0 && jbw > 0 && dbw > 0
 
-  const js = valid ? calcJS(jp, jg, jd, sp, sg, sd) : null
+  // Bandwidth penalty: jammer power is diluted across its sweep bandwidth
+  // Only the fraction landing in the drone's channel (dbw) is effective
+  const bwPenaltyDb = jbw > dbw ? 10 * Math.log10(dbw / jbw) : 0
+
+  const js_geometric = valid ? calcJS(jp, jg, jd, sp, sg, sd) : null
+  const js = js_geometric !== null ? js_geometric + bwPenaltyDb : null
   const v = js !== null ? verdict(js) : null
 
   const InputField = ({
@@ -169,6 +178,21 @@ export default function JSRatioCalculatorPage() {
               hint="Omni ≈ 0–3 dBi · Panel ≈ 9–14 dBi" step="0.5" />
             <InputField label="Distance to Drone (m)" value={jDist} onChange={setJDist}
               hint="Distance from jammer position to the drone" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Jammer Sweep Bandwidth (MHz)</label>
+              <input type="number" min="0.1" step="0.5" value={jBW}
+                onChange={(e) => setJBW(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[{l:'2.4 GHz ISM (83 MHz)',v:'83'},{l:'5.8 GHz ISM (150 MHz)',v:'150'},{l:'Wideband (200 MHz)',v:'200'},{l:'Spot (5 MHz)',v:'5'}].map((p)=>(
+                  <button key={p.v} onClick={()=>setJBW(p.v)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
+                    {p.l}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Total RF bandwidth the jammer covers around the target frequency</p>
+            </div>
           </div>
         </div>
 
@@ -196,6 +220,24 @@ export default function JSRatioCalculatorPage() {
               hint="Consumer GCS omni ≈ 2 dBi · High-gain directional ≈ 10 dBi" step="0.5" />
             <InputField label="Distance to Drone (m)" value={sDist} onChange={setSDist}
               hint="Drone's current distance from its GCS" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Control Channel Bandwidth (MHz)
+                {selectedDrone && <span className="font-normal text-blue-600 ml-1">— auto-filled from {selectedDrone.name}</span>}
+              </label>
+              <input type="number" min="0.1" step="0.1" value={droneBW}
+                onChange={(e) => setDroneBW(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[{l:'FHSS/ELRS (0.5)',v:'0.5'},{l:'DJI O3/OcuSync (2)',v:'2'},{l:'Wi-Fi 802.11 (20)',v:'20'}].map((p)=>(
+                  <button key={p.v} onClick={()=>setDroneBW(p.v)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors">
+                    {p.l}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">FHSS: bandwidth per hop · Wi-Fi: full channel width</p>
+            </div>
           </div>
         </div>
       </div>
@@ -220,6 +262,15 @@ export default function JSRatioCalculatorPage() {
             <p>GCS EIRP: {(10 * Math.log10(sp) + sg + 30).toFixed(1)} dBm</p>
             <p>Geometry advantage: {(20 * Math.log10(sd / jd)).toFixed(1)} dB
               ({jd < sd ? 'jammer is closer to drone ✓' : 'GCS is closer to drone — jammer disadvantaged'})</p>
+            <p className={bwPenaltyDb < 0 ? 'text-orange-600 font-semibold' : 'text-gray-500'}>
+              Bandwidth penalty: {bwPenaltyDb.toFixed(1)} dB
+              {' '}({jbw > dbw
+                ? `jammer sweeps ${jbw} MHz, drone channel is ${dbw} MHz — only ${((dbw/jbw)*100).toFixed(1)}% of power is effective`
+                : 'jammer bandwidth ≤ channel bandwidth — no power dilution'})
+            </p>
+            {js_geometric !== null && bwPenaltyDb < 0 && (
+              <p>Geometric J/S: {js_geometric >= 0 ? '+' : ''}{js_geometric.toFixed(1)} dB → after BW penalty: {js >= 0 ? '+' : ''}{js.toFixed(1)} dB</p>
+            )}
           </div>
         </div>
       )}

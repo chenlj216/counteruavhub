@@ -17,8 +17,10 @@ export interface DroneRecord {
   sourceTier: SourceTier
   sourceUrl?: string
   // Structured RF fields for calculator integration
-  controlFreqMHz: number[]  // primary control-link frequencies in MHz (multi-band supported)
-  gcsTxPowerDbm: number     // GCS max transmitter power in dBm (the signal a jammer must overcome)
+  controlFreqMHz: number[]       // primary control-link frequencies in MHz (multi-band supported)
+  gcsTxPowerDbm: number          // GCS max transmitter power in dBm (the signal a jammer must overcome)
+  controlChannelBW_MHz: number   // instantaneous control-link channel bandwidth in MHz
+                                 // FHSS systems: bandwidth per hop; fixed-channel (Wi-Fi): full channel width
 }
 
 export const drones: DroneRecord[] = [
@@ -39,6 +41,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/mavic-4-pro/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-mavic-3-pro',
@@ -56,6 +59,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/mavic-3-pro/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-mavic-3-classic',
@@ -73,6 +77,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/mavic-3-classic/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-air-3s',
@@ -90,6 +95,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/air-3s/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-mini-4-pro',
@@ -107,6 +113,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/mini-4-pro/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-mini-3-pro',
@@ -124,6 +131,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/mini-3-pro/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-fpv',
@@ -141,6 +149,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/dji-fpv/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
 
   // ─── DJI Industrial ─────────────────────────────────────────────────────────
@@ -160,6 +169,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/matrice-4t/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-matrice-400',
@@ -177,6 +187,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/matrice-400/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-matrice-350-rtk',
@@ -194,6 +205,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/matrice-350-rtk/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-matrice-300-rtk',
@@ -211,6 +223,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/matrice-300-rtk/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'dji-matrice-30t',
@@ -228,6 +241,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/matrice-30/specs',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
 
   // ─── Autel ──────────────────────────────────────────────────────────────────
@@ -247,6 +261,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.autelrobotics.com/evo-max-4t/',
     controlFreqMHz: [915, 2400, 5800],
     gcsTxPowerDbm: 27,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'autel-evo-max-4n',
@@ -264,6 +279,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.autelrobotics.com/evo-max-4n/',
     controlFreqMHz: [915, 2400, 5800],
     gcsTxPowerDbm: 27,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'autel-evo-ii-pro-v3',
@@ -281,6 +297,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.autelrobotics.com/evo-ii/',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'autel-evo-lite-plus',
@@ -298,6 +315,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.autelrobotics.com/evo-lite/',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 2,
   },
 
   // ─── Parrot ─────────────────────────────────────────────────────────────────
@@ -317,6 +335,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.parrot.com/us/drones/anafi-usa',
     controlFreqMHz: [2400, 5500],
     gcsTxPowerDbm: 23,
+    controlChannelBW_MHz: 20,
   },
   {
     id: 'parrot-anafi-ai',
@@ -334,6 +353,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.parrot.com/en/drones/anafi-ai',
     controlFreqMHz: [2400, 5500],  // Wi-Fi bands; LTE varies by operator
     gcsTxPowerDbm: 20,
+    controlChannelBW_MHz: 20,
   },
   {
     id: 'parrot-anafi',
@@ -351,6 +371,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.parrot.com/en/drones/anafi',
     controlFreqMHz: [2400, 5500],
     gcsTxPowerDbm: 20,
+    controlChannelBW_MHz: 20,
   },
   {
     id: 'parrot-anafi-ukr',
@@ -367,6 +388,7 @@ export const drones: DroneRecord[] = [
     sourceTier: 'official',
     controlFreqMHz: [2400, 5500],
     gcsTxPowerDbm: 23,
+    controlChannelBW_MHz: 20,
   },
 
   // ─── Skydio ─────────────────────────────────────────────────────────────────
@@ -386,6 +408,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.skydio.com/skydio-x10',
     controlFreqMHz: [2400, 4900, 5500],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 20,
   },
   {
     id: 'skydio-x10d',
@@ -403,6 +426,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.skydio.com/skydio-x10d',
     controlFreqMHz: [2400, 5500],
     gcsTxPowerDbm: 26,
+    controlChannelBW_MHz: 20,
   },
 
   // ─── FPV Protocols ──────────────────────────────────────────────────────────
@@ -422,6 +446,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.expresslrs.org',
     controlFreqMHz: [868, 915, 2400],
     gcsTxPowerDbm: 30,  // 1000 mW max module power
+    controlChannelBW_MHz: 0.5,
   },
   {
     id: 'fpv-tbs-crossfire',
@@ -439,6 +464,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.team-blacksheep.com/products/prod:crossfire_tx',
     controlFreqMHz: [868, 915],
     gcsTxPowerDbm: 33,  // 2000 mW = 33 dBm
+    controlChannelBW_MHz: 0.5,
   },
   {
     id: 'fpv-dji-o3-air-unit',
@@ -456,6 +482,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.dji.com/o3-air-unit/specs',
     controlFreqMHz: [2400],
     gcsTxPowerDbm: 26,  // ~25.5 dBm rounded to 26
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'fpv-hdzero',
@@ -473,6 +500,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.hd-zero.com',
     controlFreqMHz: [5800],  // video link is primary jamming target; RC handled by external protocol
     gcsTxPowerDbm: 30,  // 1000 mW max video TX = 30 dBm
+    controlChannelBW_MHz: 0.5,  // RC link via ELRS/Crossfire
   },
   {
     id: 'fpv-walksnail-avatar',
@@ -490,6 +518,7 @@ export const drones: DroneRecord[] = [
     sourceUrl: 'https://www.walksnail.com',
     controlFreqMHz: [2400, 5800],
     gcsTxPowerDbm: 23,  // 200 mW max = 23 dBm
+    controlChannelBW_MHz: 2,
   },
   {
     id: 'fpv-analog',
@@ -506,6 +535,7 @@ export const drones: DroneRecord[] = [
     sourceTier: 'third-party',
     controlFreqMHz: [433, 868, 2400],
     gcsTxPowerDbm: 28,  // 600 mW video TX max = ~28 dBm
+    controlChannelBW_MHz: 1,   // FHSS RC, typical 0.5–1 MHz per hop
   },
 ]
 

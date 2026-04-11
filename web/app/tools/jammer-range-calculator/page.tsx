@@ -39,7 +39,9 @@ export default function JammerRangeCalculatorPage() {
   const [powerW, setPowerW] = useState<string>('10')
   const [gainDbi, setGainDbi] = useState<string>('6')
   const [freqMHz, setFreqMHz] = useState<string>('2400')
-  const [sensitivityDbm, setSensitivityDbm] = useState<string>('-85')
+  const [sensitivityDbm, setSensitivityDbm] = useState<string>('-65')
+  const [jammerBW, setJammerBW] = useState<string>('83')
+  const [droneBW, setDroneBW] = useState<string>('2')
 
   const selectedDrone = drones.find((d) => d.id === selectedDroneId) ?? null
 
@@ -49,6 +51,7 @@ export default function JammerRangeCalculatorPage() {
     setSelectedDroneId(droneId)
     setSelectedBandIdx(0)
     setFreqMHz(String(drone.controlFreqMHz[0]))
+    setDroneBW(String(drone.controlChannelBW_MHz))
   }
 
   function selectBand(idx: number) {
@@ -61,10 +64,17 @@ export default function JammerRangeCalculatorPage() {
   const g = parseFloat(gainDbi)
   const f = parseFloat(freqMHz)
   const s = parseFloat(sensitivityDbm)
-  const valid = p > 0 && f > 0 && !isNaN(g) && !isNaN(s)
+  const jbw = parseFloat(jammerBW)
+  const dbw = parseFloat(droneBW)
+  const valid = p > 0 && f > 0 && !isNaN(g) && !isNaN(s) && jbw > 0 && dbw > 0
 
-  const range = valid ? calcJammerRange(p, g, f, s) : null
+  // Effective jammer power after bandwidth dilution
+  const bwPenaltyDb = valid && jbw > dbw ? 10 * Math.log10(dbw / jbw) : 0
+  const pEff = valid ? p * (jbw > dbw ? dbw / jbw : 1) : p
+
+  const range = valid ? calcJammerRange(pEff, g, f, s) : null
   const eirpDbm = valid ? 10 * Math.log10(p) + g + 30 : null
+  const eirpEffDbm = valid ? 10 * Math.log10(pEff) + g + 30 : null
 
   // Power sweep
   const powers = [1, 5, 10, 20, 50, 100]
@@ -185,20 +195,68 @@ export default function JammerRangeCalculatorPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Target Receiver Sensitivity (dBm)
+              GCS Signal at Drone (dBm) — Jamming Threshold
             </label>
             <input type="number" step="1" value={sensitivityDbm}
               onChange={(e) => setSensitivityDbm(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400" />
-            <p className="text-xs text-gray-400 mt-1">
-              Typical drone receiver: −80 to −90 dBm · Conservative estimate: −75 dBm
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[
+                { label: 'DJI @ 200m', value: '-60' },
+                { label: 'DJI @ 500m', value: '-66' },
+                { label: 'DJI @ 1 km', value: '-72' },
+                { label: 'Long-range @ 2 km', value: '-78' },
+              ].map((p) => (
+                <button key={p.value} onClick={() => setSensitivityDbm(p.value)}
+                  className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors font-mono">
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Set to the estimated GCS signal level at the drone's location (J/S threshold = 0 dB).
+              Use the <a href="/tools/js-ratio-calculator" className="underline hover:text-red-500">J/S Calculator</a> for a precise value from your specific geometry.
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Jammer Sweep Bandwidth (MHz)</label>
+            <input type="number" min="0.1" step="0.5" value={jammerBW}
+              onChange={(e) => setJammerBW(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400" />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[{l:'2.4 GHz ISM (83)',v:'83'},{l:'5.8 GHz ISM (150)',v:'150'},{l:'Wideband (200)',v:'200'},{l:'Spot (5)',v:'5'}].map((pr)=>(
+                <button key={pr.v} onClick={()=>setJammerBW(pr.v)}
+                  className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
+                  {pr.l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Drone Control Channel Bandwidth (MHz)
+              {selectedDrone && <span className="text-red-500 ml-1">— auto-filled from {selectedDrone.name}</span>}
+            </label>
+            <input type="number" min="0.1" step="0.1" value={droneBW}
+              onChange={(e) => setDroneBW(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400" />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[{l:'FHSS/ELRS (0.5)',v:'0.5'},{l:'DJI O3/OcuSync (2)',v:'2'},{l:'Wi-Fi (20)',v:'20'}].map((pr)=>(
+                <button key={pr.v} onClick={()=>setDroneBW(pr.v)}
+                  className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
+                  {pr.l}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-1">FHSS: bandwidth per hop · Wi-Fi: full channel width</p>
           </div>
         </div>
       </div>
 
       {/* Result */}
-      {range !== null && eirpDbm !== null && (
+      {range !== null && eirpDbm !== null && eirpEffDbm !== null && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -206,19 +264,28 @@ export default function JammerRangeCalculatorPage() {
               <p className="text-3xl font-bold text-red-800 font-mono">{fmt(range)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-1">Jammer EIRP</p>
+              <p className="text-xs text-gray-500 mb-1">Rated EIRP</p>
               <p className="text-3xl font-bold text-red-700 font-mono">{eirpDbm.toFixed(1)} dBm</p>
             </div>
           </div>
-          {selectedDrone && (
-            <p className="text-xs text-red-700 bg-red-100 rounded px-3 py-2 mt-3">
-              Against <span className="font-semibold">{selectedDrone.name}</span> (GCS: {selectedDrone.gcsTxPowerDbm} dBm) —
-              use <Link href="/tools/js-ratio-calculator" className="underline font-semibold">J/S Calculator</Link> to confirm effectiveness at specific engagement geometry.
-            </p>
-          )}
-          <p className="text-xs text-gray-500 mt-2">
-            Free-space model. Real-world range is typically 30–60% of this value due to multipath and terrain.
-          </p>
+          <div className="text-xs space-y-1 border-t border-red-200 pt-3 mt-3">
+            {bwPenaltyDb < 0 ? (
+              <p className="text-orange-700 font-semibold">
+                Bandwidth penalty: {bwPenaltyDb.toFixed(1)} dB — jammer sweeps {jbw} MHz,
+                drone channel is {dbw} MHz ({((dbw/jbw)*100).toFixed(1)}% of power is effective →
+                effective EIRP: {eirpEffDbm.toFixed(1)} dBm)
+              </p>
+            ) : (
+              <p className="text-green-700">Bandwidth: no penalty — jammer bandwidth ≤ channel bandwidth</p>
+            )}
+            {selectedDrone && (
+              <p className="text-red-700">
+                Against <span className="font-semibold">{selectedDrone.name}</span> (GCS: {selectedDrone.gcsTxPowerDbm} dBm, channel: {selectedDrone.controlChannelBW_MHz} MHz) —
+                use <Link href="/tools/js-ratio-calculator" className="underline font-semibold">J/S Calculator</Link> to confirm effectiveness at specific geometry.
+              </p>
+            )}
+            <p className="text-gray-500">Free-space model. Real-world range is typically 30–60% of this value.</p>
+          </div>
         </div>
       )}
 
@@ -227,25 +294,26 @@ export default function JammerRangeCalculatorPage() {
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-8">
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 text-sm">
-              Range vs Power — {g} dBi gain · {f >= 1000 ? (f / 1000).toFixed(1) + ' GHz' : f + ' MHz'}
+              Range vs Power — {g} dBi · {f >= 1000 ? (f / 1000).toFixed(1) + ' GHz' : f + ' MHz'} · BW {jbw}/{dbw} MHz (penalty {bwPenaltyDb.toFixed(1)} dB)
             </h2>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-2 text-left text-xs font-semibold text-gray-500">Power</th>
-                <th className="px-6 py-2 text-left text-xs font-semibold text-gray-500">EIRP</th>
+                <th className="px-6 py-2 text-left text-xs font-semibold text-gray-500">Rated Power</th>
+                <th className="px-6 py-2 text-left text-xs font-semibold text-gray-500">Eff. EIRP</th>
                 <th className="px-6 py-2 text-right text-xs font-semibold text-gray-500">Effective Range</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {powers.map((pw) => {
-                const r = calcJammerRange(pw, g, f, s)
-                const eirp = 10 * Math.log10(pw) + g + 30
+                const pwEff = jbw > dbw ? pw * (dbw / jbw) : pw
+                const r = calcJammerRange(pwEff, g, f, s)
+                const eirpEff = 10 * Math.log10(pwEff) + g + 30
                 return (
                   <tr key={pw} className={pw === p ? 'bg-red-50' : ''}>
                     <td className="px-6 py-2 font-mono text-gray-700">{pw} W</td>
-                    <td className="px-6 py-2 font-mono text-gray-600">{eirp.toFixed(1)} dBm</td>
+                    <td className="px-6 py-2 font-mono text-gray-600">{eirpEff.toFixed(1)} dBm</td>
                     <td className="px-6 py-2 font-mono text-gray-900 text-right font-semibold">{fmt(r)}</td>
                   </tr>
                 )
