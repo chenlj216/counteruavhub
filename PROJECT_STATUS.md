@@ -24,11 +24,11 @@
 - [x] 构建验证通过（npm run build）
 
 ### 待完成
-- [ ] GitHub 仓库创建并推送
-- [ ] Cloudflare Pages 连接 GitHub
-- [ ] 绑定域名 counteruavhub.com
-- [ ] Google Analytics 4 接入（需 GA4 Measurement ID）
-- [ ] Google Search Console 提交
+- [x] GitHub 仓库创建并推送（chenlj216/counteruavhub）
+- [x] Cloudflare Pages 连接 GitHub（已部署至 counteruavhub.pages.dev）
+- [x] 绑定域名 counteruavhub.com
+- [x] Google Analytics 4 接入（G-NYXPGV7XCR）
+- [x] Google Search Console 验证 + Sitemap 提交
 - [ ] 移动端测试
 - [ ] LCP 性能测试
 

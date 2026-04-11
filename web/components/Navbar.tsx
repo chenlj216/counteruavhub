@@ -8,8 +8,8 @@ export default function Navbar() {
           CounterUAV<span className="text-blue-600">Hub</span>
         </Link>
         <div className="flex items-center gap-6 text-sm font-medium">
-          <Link href="/tools/drone-frequency-database" className="text-gray-600 hover:text-blue-600 transition-colors">
-            Signal Database
+          <Link href="/tools" className="text-gray-600 hover:text-blue-600 transition-colors">
+            Tools
           </Link>
           <Link href="/blog" className="text-gray-600 hover:text-blue-600 transition-colors">
             Blog
