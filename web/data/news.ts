@@ -1,0 +1,136 @@
+export interface NewsItem {
+  id: string
+  title: string
+  source: string
+  date: string
+  excerpt: string
+  url: string
+  category: 'incident' | 'technology' | 'regulation' | 'military' | 'market'
+}
+
+export const newsItems: NewsItem[] = [
+  {
+    id: 'newark-drone-closures-2025',
+    title: 'Newark Liberty Airport Closes Runways Repeatedly Due to Drone Incursions',
+    source: 'The War Zone',
+    date: '2026-01-14',
+    excerpt: 'Newark Liberty experienced multiple runway closures over several weeks due to drone sightings in restricted airspace, renewing pressure on the FAA to accelerate counter-UAS deployment at major airports.',
+    url: 'https://www.thedrive.com/the-war-zone',
+    category: 'incident',
+  },
+  {
+    id: 'dji-ban-ndaa-2026',
+    title: 'DJI Remains on NDAA Prohibited List; US Military Continues Alternative Sourcing',
+    source: 'Defense News',
+    date: '2026-02-03',
+    excerpt: 'Despite lobbying efforts, DJI remains designated as a covered entity under the NDAA, blocking US government procurement. American manufacturers including Skydio and Joby continue to fill the gap.',
+    url: 'https://www.defensenews.com',
+    category: 'regulation',
+  },
+  {
+    id: 'ukraine-fpv-scale-2025',
+    title: 'Ukraine FPV Drone Production Reaches Industrial Scale; Electronic Countermeasures Evolve in Response',
+    source: 'Oryx / Defense Express',
+    date: '2025-11-20',
+    excerpt: 'Ukrainian forces are producing tens of thousands of FPV drones monthly. Russian electronic warfare units have adapted, deploying mobile jamming systems closer to the front to counter the threat, while Ukraine develops frequency-hopping and AI-guided autonomous variants.',
+    url: 'https://www.oryxspioenkop.com',
+    category: 'military',
+  },
+  {
+    id: 'faa-cuas-airport-program-2026',
+    title: 'FAA Expands Counter-UAS Pilot Program to 10 Additional Airports',
+    source: 'Aviation Week',
+    date: '2026-03-15',
+    excerpt: 'The FAA announced expansion of its counter-UAS technology evaluation program to 10 additional US airports, following positive results from the initial 5-site deployment. The program tests RF detection, radar, and integrated C-UAS management systems.',
+    url: 'https://aviationweek.com',
+    category: 'regulation',
+  },
+  {
+    id: 'hensoldt-xpeller-order-2025',
+    title: 'HENSOLDT Receives Major Xpeller C-UAS Order from European Government',
+    source: 'HENSOLDT Press Release',
+    date: '2025-12-08',
+    excerpt: 'HENSOLDT AG announced a significant contract for its Xpeller counter-drone system, which integrates radar, RF sensing, and jamming capabilities into a single platform. Financial terms were not disclosed.',
+    url: 'https://www.hensoldt.net',
+    category: 'market',
+  },
+  {
+    id: 'cisa-cuas-framework-2026',
+    title: 'CISA Releases Updated Counter-UAS Framework for Critical Infrastructure Operators',
+    source: 'CISA',
+    date: '2026-02-28',
+    excerpt: 'The Cybersecurity and Infrastructure Security Agency released updated guidance for critical infrastructure operators on counter-UAS deployment, including a tiered response framework and coordination procedures with federal law enforcement.',
+    url: 'https://www.cisa.gov',
+    category: 'regulation',
+  },
+  {
+    id: 'skydio-dod-contract-2026',
+    title: 'Skydio Wins $100M+ DoD Contract for Autonomous UAS Program',
+    source: 'Reuters',
+    date: '2026-01-22',
+    excerpt: 'Skydio has been awarded a significant Department of Defense contract for its autonomous drone systems, part of the DoD\'s effort to source drones from non-NDAA-prohibited manufacturers.',
+    url: 'https://www.reuters.com',
+    category: 'market',
+  },
+  {
+    id: 'red-sea-drone-ship-attacks-2025',
+    title: 'Houthi Maritime Drone Attacks Drive Demand for Naval C-UAS Systems',
+    source: 'USNI News',
+    date: '2025-10-30',
+    excerpt: 'Continued Houthi drone and USV attacks on commercial shipping in the Red Sea have driven significant interest in naval counter-UAS systems, with multiple navies accelerating procurement of directed-energy and RF jamming solutions for shipboard defense.',
+    url: 'https://news.usni.org',
+    category: 'military',
+  },
+  {
+    id: 'dedrone-acquisition-2025',
+    title: 'Dedrone Acquired; C-UAS Software Market Consolidates',
+    source: 'Janes',
+    date: '2025-09-14',
+    excerpt: 'The counter-drone software sector continued consolidation as Dedrone was acquired, combining its RF detection and airspace management platform with a larger defense electronics portfolio. Analysts expect further M&A activity as the market matures.',
+    url: 'https://www.janes.com',
+    category: 'market',
+  },
+  {
+    id: 'uk-counter-drone-2025',
+    title: 'UK Home Office Expands C-UAS Authorization to Additional Airport Categories',
+    source: 'UK Civil Aviation Authority',
+    date: '2025-11-05',
+    excerpt: 'The UK Home Office updated its counter-UAS authorization framework, expanding eligibility for active countermeasure deployment to regional airports and major event venues under a new licensed operator scheme.',
+    url: 'https://www.caa.co.uk',
+    category: 'regulation',
+  },
+  {
+    id: 'directed-energy-marine-corps-2026',
+    title: 'US Marine Corps Deploys First Operational Laser Counter-Drone System',
+    source: 'Breaking Defense',
+    date: '2026-03-01',
+    excerpt: 'The Marine Corps has fielded its first operational directed-energy counter-UAS system, a compact laser unit designed for expeditionary use. The system can engage Group 1 and Group 2 drones at ranges up to 1 km.',
+    url: 'https://breakingdefense.com',
+    category: 'military',
+  },
+  {
+    id: 'india-drone-threat-border-2026',
+    title: 'India Accelerates C-UAS Procurement After Border Drone Incidents',
+    source: 'The Hindu',
+    date: '2026-02-17',
+    excerpt: 'India\'s Ministry of Home Affairs fast-tracked procurement of counter-drone systems for deployment along the Pakistan border following a series of drone-dropped weapon and narcotics incidents. BEL and foreign vendors are competing for the contract.',
+    url: 'https://www.thehindu.com',
+    category: 'military',
+  },
+]
+
+export const categoryLabels: Record<NewsItem['category'], string> = {
+  incident: 'Incident',
+  technology: 'Technology',
+  regulation: 'Regulation',
+  military: 'Military',
+  market: 'Market',
+}
+
+export const categoryColors: Record<NewsItem['category'], string> = {
+  incident: 'bg-red-100 text-red-700',
+  technology: 'bg-blue-100 text-blue-700',
+  regulation: 'bg-yellow-100 text-yellow-700',
+  military: 'bg-gray-100 text-gray-700',
+  market: 'bg-green-100 text-green-700',
+}
