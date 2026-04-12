@@ -97,7 +97,10 @@ export default function FSPLCalculatorPage() {
               {FREQ_PRESETS.map((p) => (
                 <button
                   key={p.value}
-                  onClick={() => setFreqMHz(String(p.value))}
+                  onClick={() => {
+                    setFreqMHz(String(p.value))
+                    if (result !== null && d > 0) setResult({ d, f: p.value })
+                  }}
                   className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors"
                 >
                   {p.label}

@@ -96,16 +96,26 @@ export default function JammerCalculatorPage() {
     if (!drone) { setSelectedDroneId(''); return }
     setSelectedDroneId(droneId)
     setSelectedBandIdx(0)
-    setFreq(String(drone.controlFreqMHz[0]))
-    setSPow(String(dbmToW(drone.gcsTxPowerDbm).toFixed(4)))
+    const newF = drone.controlFreqMHz[0]
+    const newSp = parseFloat(dbmToW(drone.gcsTxPowerDbm).toFixed(4))
+    const newDbw = drone.controlChannelBW_MHz
+    setFreq(String(newF))
+    setSPow(String(newSp))
     setSGain('2')
-    setDroneBW(String(drone.controlChannelBW_MHz))
+    setDroneBW(String(newDbw))
+    if (result !== null) {
+      setResult((prev) => prev ? { ...prev, f: newF, sp: newSp, sg: 2, dbw: newDbw } : null)
+    }
   }
 
   function selectBand(idx: number) {
     if (!selectedDrone) return
     setSelectedBandIdx(idx)
-    setFreq(String(selectedDrone.controlFreqMHz[idx]))
+    const newF = selectedDrone.controlFreqMHz[idx]
+    setFreq(String(newF))
+    if (result !== null) {
+      setResult((prev) => prev ? { ...prev, f: newF } : null)
+    }
   }
 
   const jp = parseFloat(jPow), jg = parseFloat(jGain), jd = parseFloat(jDist)
@@ -257,7 +267,11 @@ export default function JammerCalculatorPage() {
               {!selectedDrone && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {FREQ_PRESETS.map((fp) => (
-                    <button key={fp.v} onClick={() => setFreq(fp.v)}
+                    <button key={fp.v} onClick={() => {
+                      const v = parseFloat(fp.v)
+                      setFreq(fp.v)
+                      if (result !== null) setResult((prev) => prev ? { ...prev, f: v } : null)
+                    }}
                       className="text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
                       {fp.label}
                     </button>
@@ -272,7 +286,11 @@ export default function JammerCalculatorPage() {
                 className={`${INPUT_CLS} focus:ring-red-400`} />
               <div className="flex flex-wrap gap-1 mt-1">
                 {JBW_PRESETS.map((p) => (
-                  <button key={p.v} onClick={() => setJBW(p.v)}
+                  <button key={p.v} onClick={() => {
+                    const v = parseFloat(p.v)
+                    setJBW(p.v)
+                    if (result !== null) setResult((prev) => prev ? { ...prev, jbw: v } : null)
+                  }}
                     className="text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
                     {p.label}
                   </button>
@@ -329,7 +347,11 @@ export default function JammerCalculatorPage() {
                 className={`${INPUT_CLS} focus:ring-blue-500`} />
               <div className="flex flex-wrap gap-1 mt-1">
                 {DBW_PRESETS.map((p) => (
-                  <button key={p.v} onClick={() => setDroneBW(p.v)}
+                  <button key={p.v} onClick={() => {
+                    const v = parseFloat(p.v)
+                    setDroneBW(p.v)
+                    if (result !== null) setResult((prev) => prev ? { ...prev, dbw: v } : null)
+                  }}
                     className="text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors">
                     {p.label}
                   </button>

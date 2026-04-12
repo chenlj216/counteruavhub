@@ -113,7 +113,10 @@ export default function RFDetectionRangePage() {
           <div className="flex flex-wrap gap-2 mb-1">
             {DRONE_PRESETS.map((p) => (
               <button key={p.label}
-                onClick={() => { setDronePow(String(p.power)); setDroneGain(String(p.gain)); setFreqMHz(String(p.freq)) }}
+                onClick={() => {
+                  setDronePow(String(p.power)); setDroneGain(String(p.gain)); setFreqMHz(String(p.freq))
+                  if (result !== null) setResult({ dp: p.power, dg: p.gain, f: p.freq, rs, rg })
+                }}
                 className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-orange-100 text-gray-600 hover:text-orange-700 transition-colors">
                 {p.label}
               </button>
@@ -150,7 +153,10 @@ export default function RFDetectionRangePage() {
           <div className="flex flex-wrap gap-2 mb-1">
             {RX_PRESETS.map((p) => (
               <button key={p.label}
-                onClick={() => { setRxSens(String(p.sens)); setRxGain(String(p.gain)) }}
+                onClick={() => {
+                  setRxSens(String(p.sens)); setRxGain(String(p.gain))
+                  if (result !== null) setResult({ dp, dg, f, rs: p.sens, rg: p.gain })
+                }}
                 className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors">
                 {p.label}
               </button>
