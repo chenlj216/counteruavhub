@@ -17,18 +17,45 @@ const FREQ_PRESETS = [
   { label: '5.8 GHz (FPV/DJI)', value: 5800 },
 ]
 
+type ResultSnapshot = { d: number; f: number }
+
 export default function FSPLCalculatorPage() {
   const [distM, setDistM] = useState<string>('1000')
   const [freqMHz, setFreqMHz] = useState<string>('2400')
+  const [result, setResult] = useState<ResultSnapshot | null>(null)
 
   const d = parseFloat(distM)
   const f = parseFloat(freqMHz)
   const valid = d > 0 && f > 0
 
-  const fspl = valid ? calcFSPL(d, f) : null
+  function handleCalculate() {
+    if (!valid) return
+    setResult({ d, f })
+  }
+
+  const isDirty = result !== null && (result.d !== d || result.f !== f)
+
+  const r = result
+  const fspl = r ? calcFSPL(r.d, r.f) : null
 
   // Multi-distance table
   const distances = [100, 500, 1000, 2000, 5000, 10000]
+
+  const btnCls = !valid
+    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+    : isDirty
+    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+    : result
+    ? 'bg-green-600 hover:bg-green-700 text-white'
+    : 'bg-blue-600 hover:bg-blue-700 text-white'
+
+  const btnLabel = !valid
+    ? 'Fill in all fields to calculate'
+    : isDirty
+    ? '⟳ Recalculate'
+    : result
+    ? 'Calculated ✓'
+    : 'Calculate'
 
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -50,7 +77,7 @@ export default function FSPLCalculatorPage() {
       </div>
 
       {/* Input card */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-6">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-4">
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <h2 className="font-bold text-gray-900 text-sm">Inputs</h2>
         </div>
@@ -94,23 +121,35 @@ export default function FSPLCalculatorPage() {
         </div>
       </div>
 
+      {/* Calculate button */}
+      <button
+        onClick={handleCalculate}
+        disabled={!valid}
+        className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors mb-6 ${btnCls}`}
+      >
+        {btnLabel}
+      </button>
+
       {/* Result */}
-      {fspl !== null && (
-        <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-6">
+      {r !== null && fspl !== null && (
+        <div className={`bg-purple-50 border border-purple-200 rounded-xl p-6 mb-6 ${isDirty ? 'opacity-60' : ''}`}>
+          {isDirty && (
+            <p className="text-xs text-orange-700 font-medium mb-3">Inputs have changed — click Recalculate to update</p>
+          )}
           <p className="text-sm text-gray-600 mb-1">Free Space Path Loss</p>
           <p className="text-4xl font-bold text-purple-800 font-mono">{fspl.toFixed(1)} dB</p>
           <p className="text-xs text-gray-500 mt-2">
-            At {(d >= 1000 ? (d / 1000).toFixed(2) + ' km' : d + ' m')} &nbsp;·&nbsp; {f >= 1000 ? (f / 1000).toFixed(2) + ' GHz' : f + ' MHz'}
+            At {(r.d >= 1000 ? (r.d / 1000).toFixed(2) + ' km' : r.d + ' m')} &nbsp;·&nbsp; {r.f >= 1000 ? (r.f / 1000).toFixed(2) + ' GHz' : r.f + ' MHz'}
           </p>
         </div>
       )}
 
       {/* Multi-distance table */}
-      {f > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-8">
+      {r !== null && (
+        <div className={`bg-white border border-gray-200 rounded-xl overflow-hidden mb-8 ${isDirty ? 'opacity-60' : ''}`}>
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 text-sm">
-              FSPL vs Distance at {f >= 1000 ? (f / 1000).toFixed(2) + ' GHz' : f + ' MHz'}
+              FSPL vs Distance at {r.f >= 1000 ? (r.f / 1000).toFixed(2) + ' GHz' : r.f + ' MHz'}
             </h2>
           </div>
           <table className="w-full text-sm">
@@ -122,12 +161,12 @@ export default function FSPLCalculatorPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {distances.map((dm) => (
-                <tr key={dm} className={dm === d ? 'bg-purple-50' : ''}>
+                <tr key={dm} className={dm === r.d ? 'bg-purple-50' : ''}>
                   <td className="px-6 py-2 font-mono text-gray-700">
                     {dm >= 1000 ? (dm / 1000) + ' km' : dm + ' m'}
                   </td>
                   <td className="px-6 py-2 font-mono text-gray-900 text-right font-semibold">
-                    {calcFSPL(dm, f).toFixed(1)}
+                    {calcFSPL(dm, r.f).toFixed(1)}
                   </td>
                 </tr>
               ))}

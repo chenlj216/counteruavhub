@@ -63,6 +63,12 @@ const DBW_PRESETS = [
 
 const INPUT_CLS = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2'
 
+type ResultSnapshot = {
+  jp: number; jg: number; jd: number
+  sp: number; sg: number; sd: number
+  jbw: number; dbw: number; f: number
+}
+
 export default function JammerCalculatorPage() {
   const [selectedDroneId, setSelectedDroneId] = useState<string>('')
   const [selectedBandIdx, setSelectedBandIdx] = useState<number>(0)
@@ -79,6 +85,9 @@ export default function JammerCalculatorPage() {
   const [sGain, setSGain] = useState<string>('2')
   const [sDist, setSDist] = useState<string>('1000')
   const [droneBW, setDroneBW] = useState<string>('2')
+
+  // Calculation snapshot
+  const [result, setResult] = useState<ResultSnapshot | null>(null)
 
   const selectedDrone = drones.find((d) => d.id === selectedDroneId) ?? null
 
@@ -107,15 +116,43 @@ export default function JammerCalculatorPage() {
     [jp, jg, jd, sp, sg, sd, jbw, dbw, f].every((x) => !isNaN(x)) &&
     jp > 0 && sp > 0 && jd > 0 && sd > 0 && jbw > 0 && dbw > 0 && f > 0
 
-  const bwPenaltyDb = valid && jbw > dbw ? 10 * Math.log10(dbw / jbw) : 0
-  const pEff = valid ? (jbw > dbw ? jp * (dbw / jbw) : jp) : jp
+  function handleCalculate() {
+    if (!valid) return
+    setResult({ jp, jg, jd, sp, sg, sd, jbw, dbw, f })
+  }
 
-  const gcsAtDroneDbm = valid ? calcGCSAtDrone(sp, sg, sd, f) : null
-  const js = valid ? calcJS(pEff, jg, jd, sp, sg, sd) : null
-  const maxRange = valid && gcsAtDroneDbm !== null ? calcMaxRange(pEff, jg, f, gcsAtDroneDbm) : null
+  const isDirty = result !== null && (
+    result.jp !== jp || result.jg !== jg || result.jd !== jd ||
+    result.sp !== sp || result.sg !== sg || result.sd !== sd ||
+    result.jbw !== jbw || result.dbw !== dbw || result.f !== f
+  )
+
+  // All math from snapshot
+  const r = result
+  const bwPenaltyDb = r && r.jbw > r.dbw ? 10 * Math.log10(r.dbw / r.jbw) : 0
+  const pEff = r ? (r.jbw > r.dbw ? r.jp * (r.dbw / r.jbw) : r.jp) : 0
+  const gcsAtDroneDbm = r ? calcGCSAtDrone(r.sp, r.sg, r.sd, r.f) : null
+  const js = r ? calcJS(pEff, r.jg, r.jd, r.sp, r.sg, r.sd) : null
+  const maxRange = r && gcsAtDroneDbm !== null ? calcMaxRange(pEff, r.jg, r.f, gcsAtDroneDbm) : null
   const v = js !== null ? verdict(js) : null
 
   const powers = [1, 5, 10, 20, 50, 100]
+
+  const btnCls = !valid
+    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+    : isDirty
+    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+    : result
+    ? 'bg-green-600 hover:bg-green-700 text-white'
+    : 'bg-red-600 hover:bg-red-700 text-white'
+
+  const btnLabel = !valid
+    ? 'Fill in all fields to calculate'
+    : isDirty
+    ? '⟳ Recalculate'
+    : result
+    ? 'Calculated ✓'
+    : 'Calculate'
 
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -189,7 +226,7 @@ export default function JammerCalculatorPage() {
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-4">
         {/* Jammer */}
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <div className="px-6 py-3 bg-red-50 border-b border-red-100">
@@ -303,9 +340,23 @@ export default function JammerCalculatorPage() {
         </div>
       </div>
 
+      {/* Calculate button */}
+      <button
+        onClick={handleCalculate}
+        disabled={!valid}
+        className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors mb-6 ${btnCls}`}
+      >
+        {btnLabel}
+      </button>
+
       {/* Results */}
-      {valid && js !== null && maxRange !== null && gcsAtDroneDbm !== null && v !== null && (
-        <div className={`border rounded-xl overflow-hidden mb-6 ${v.border} ${v.bg}`}>
+      {r !== null && js !== null && maxRange !== null && gcsAtDroneDbm !== null && v !== null && (
+        <div className={`border rounded-xl overflow-hidden mb-6 ${isDirty ? 'opacity-60' : ''} ${v.border} ${v.bg}`}>
+          {isDirty && (
+            <div className="px-4 py-2 bg-orange-100 border-b border-orange-200 text-xs text-orange-700 font-medium">
+              Inputs have changed — click Recalculate to update
+            </div>
+          )}
           <div className="grid grid-cols-2 divide-x divide-gray-200 p-6">
             <div className="pr-6">
               <p className="text-xs text-gray-500 mb-1">J/S Ratio at Scenario Geometry</p>
@@ -317,44 +368,44 @@ export default function JammerCalculatorPage() {
             <div className="pl-6">
               <p className="text-xs text-gray-500 mb-1">Max Jamming Range (J/S = 0 dB)</p>
               <p className="text-3xl font-bold font-mono text-gray-900">{fmt(maxRange)}</p>
-              <p className={`text-sm mt-1 ${jd <= maxRange ? 'text-green-700' : 'text-red-600'}`}>
-                {jd <= maxRange
-                  ? `current position (${fmt(jd)}) is within range ✓`
-                  : `move ${fmt(jd - maxRange)} closer to jam`}
+              <p className={`text-sm mt-1 ${r.jd <= maxRange ? 'text-green-700' : 'text-red-600'}`}>
+                {r.jd <= maxRange
+                  ? `current position (${fmt(r.jd)}) is within range ✓`
+                  : `move ${fmt(r.jd - maxRange)} closer to jam`}
               </p>
             </div>
           </div>
           <div className="px-6 pb-5 border-t border-gray-200 pt-3 text-xs space-y-1.5 text-gray-500">
             <p>
-              Jammer EIRP (rated): {(10 * Math.log10(jp) + jg + 30).toFixed(1)} dBm
+              Jammer EIRP (rated): {(10 * Math.log10(r.jp) + r.jg + 30).toFixed(1)} dBm
               {bwPenaltyDb < 0 && (
                 <span className="text-orange-600 font-semibold">
-                  {' '}→ effective {(10 * Math.log10(pEff) + jg + 30).toFixed(1)} dBm after BW penalty
+                  {' '}→ effective {(10 * Math.log10(pEff) + r.jg + 30).toFixed(1)} dBm after BW penalty
                 </span>
               )}
             </p>
-            <p>GCS EIRP: {(10 * Math.log10(sp) + sg + 30).toFixed(1)} dBm</p>
-            <p>GCS signal at drone: <span className="font-mono">{gcsAtDroneDbm.toFixed(1)} dBm</span> (Friis, {sd} m)</p>
+            <p>GCS EIRP: {(10 * Math.log10(r.sp) + r.sg + 30).toFixed(1)} dBm</p>
+            <p>GCS signal at drone: <span className="font-mono">{gcsAtDroneDbm.toFixed(1)} dBm</span> (Friis, {r.sd} m)</p>
             <p className={bwPenaltyDb < 0 ? 'text-orange-600 font-semibold' : ''}>
               Bandwidth penalty: {bwPenaltyDb.toFixed(1)} dB
               {bwPenaltyDb < 0
-                ? ` — ${jbw} MHz sweep ÷ ${dbw} MHz channel = ${((dbw / jbw) * 100).toFixed(1)}% effective power`
+                ? ` — ${r.jbw} MHz sweep ÷ ${r.dbw} MHz channel = ${((r.dbw / r.jbw) * 100).toFixed(1)}% effective power`
                 : ' — jammer BW ≤ channel BW, no dilution'}
             </p>
             <p>
-              Geometry: jammer {fmt(jd)} · GCS {fmt(sd)} from drone
-              {' '}({jd < sd ? '— jammer closer ✓' : '— GCS closer, jammer disadvantaged'})
+              Geometry: jammer {fmt(r.jd)} · GCS {fmt(r.sd)} from drone
+              {' '}({r.jd < r.sd ? '— jammer closer ✓' : '— GCS closer, jammer disadvantaged'})
             </p>
           </div>
         </div>
       )}
 
       {/* Power sweep table */}
-      {valid && gcsAtDroneDbm !== null && (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-8">
+      {r !== null && gcsAtDroneDbm !== null && (
+        <div className={`bg-white border border-gray-200 rounded-xl overflow-hidden mb-8 ${isDirty ? 'opacity-60' : ''}`}>
           <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 text-sm">
-              Power Sweep — {jg} dBi · {f >= 1000 ? (f / 1000).toFixed(1) + ' GHz' : f + ' MHz'}
+              Power Sweep — {r.jg} dBi · {r.f >= 1000 ? (r.f / 1000).toFixed(1) + ' GHz' : r.f + ' MHz'}
               {bwPenaltyDb < 0 && ` · BW penalty ${bwPenaltyDb.toFixed(1)} dB`}
             </h2>
           </div>
@@ -363,19 +414,19 @@ export default function JammerCalculatorPage() {
               <tr>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Rated Power</th>
                 <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Eff. EIRP</th>
-                <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500">J/S @ {fmt(jd)}</th>
+                <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500">J/S @ {fmt(r.jd)}</th>
                 <th className="px-4 py-2 text-right text-xs font-semibold text-gray-500">Max Range</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {powers.map((pw) => {
-                const pwEff = jbw > dbw ? pw * (dbw / jbw) : pw
-                const jsRow = calcJS(pwEff, jg, jd, sp, sg, sd)
-                const rangeRow = calcMaxRange(pwEff, jg, f, gcsAtDroneDbm)
-                const eirpEff = 10 * Math.log10(pwEff) + jg + 30
+                const pwEff = r.jbw > r.dbw ? pw * (r.dbw / r.jbw) : pw
+                const jsRow = calcJS(pwEff, r.jg, r.jd, r.sp, r.sg, r.sd)
+                const rangeRow = calcMaxRange(pwEff, r.jg, r.f, gcsAtDroneDbm)
+                const eirpEff = 10 * Math.log10(pwEff) + r.jg + 30
                 const vRow = verdict(jsRow)
                 return (
-                  <tr key={pw} className={pw === jp ? 'bg-red-50' : ''}>
+                  <tr key={pw} className={pw === r.jp ? 'bg-red-50' : ''}>
                     <td className="px-4 py-2 font-mono text-gray-700 font-semibold">{pw} W</td>
                     <td className="px-4 py-2 font-mono text-gray-500">{eirpEff.toFixed(1)} dBm</td>
                     <td className={`px-4 py-2 font-mono text-right ${vRow.color}`}>

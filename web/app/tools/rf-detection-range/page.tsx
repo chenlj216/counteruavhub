@@ -38,22 +38,52 @@ const RX_PRESETS = [
   { label: 'High-gain directional (−110 dBm)', sens: -110, gain: 15 },
 ]
 
+type ResultSnapshot = { dp: number; dg: number; f: number; rs: number; rg: number }
+
 export default function RFDetectionRangePage() {
   const [dronePow, setDronePow] = useState<string>('0.1')
   const [droneGain, setDroneGain] = useState<string>('0')
   const [freqMHz, setFreqMHz] = useState<string>('2400')
   const [rxSens, setRxSens] = useState<string>('-90')
   const [rxGain, setRxGain] = useState<string>('3')
+  const [result, setResult] = useState<ResultSnapshot | null>(null)
 
   const dp = parseFloat(dronePow), dg = parseFloat(droneGain)
   const f = parseFloat(freqMHz)
   const rs = parseFloat(rxSens), rg = parseFloat(rxGain)
   const valid = dp > 0 && f > 0 && !isNaN(dg) && !isNaN(rs) && !isNaN(rg)
 
-  const range = valid ? calcDetectionRange(dp, dg, f, rs, rg) : null
+  function handleCalculate() {
+    if (!valid) return
+    setResult({ dp, dg, f, rs, rg })
+  }
+
+  const isDirty = result !== null && (
+    result.dp !== dp || result.dg !== dg || result.f !== f ||
+    result.rs !== rs || result.rg !== rg
+  )
+
+  const r = result
+  const range = r ? calcDetectionRange(r.dp, r.dg, r.f, r.rs, r.rg) : null
 
   // Sensitivity sweep
   const sensLevels = [-75, -80, -85, -90, -95, -100, -110]
+
+  const btnCls = !valid
+    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+    : isDirty
+    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+    : result
+    ? 'bg-green-600 hover:bg-green-700 text-white'
+    : 'bg-orange-600 hover:bg-orange-700 text-white'
+
+  const btnLabel = !valid
+    ? 'Fill in all fields to calculate'
+    : isDirty
+    ? '⟳ Recalculate'
+    : result
+    ? 'Calculated ✓'
+    : 'Calculate'
 
   return (
     <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -112,7 +142,7 @@ export default function RFDetectionRangePage() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-6">
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-4">
         <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
           <h2 className="font-bold text-blue-900 text-sm">RF Sensor (Receiver)</h2>
         </div>
@@ -141,9 +171,21 @@ export default function RFDetectionRangePage() {
         </div>
       </div>
 
+      {/* Calculate button */}
+      <button
+        onClick={handleCalculate}
+        disabled={!valid}
+        className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors mb-6 ${btnCls}`}
+      >
+        {btnLabel}
+      </button>
+
       {/* Result */}
-      {range !== null && (
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-6">
+      {r !== null && range !== null && (
+        <div className={`bg-orange-50 border border-orange-200 rounded-xl p-6 mb-6 ${isDirty ? 'opacity-60' : ''}`}>
+          {isDirty && (
+            <p className="text-xs text-orange-700 font-medium mb-3">Inputs have changed — click Recalculate to update</p>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-500 mb-1">Max Detection Range</p>
@@ -152,7 +194,7 @@ export default function RFDetectionRangePage() {
             <div>
               <p className="text-xs text-gray-500 mb-1">Drone EIRP</p>
               <p className="text-3xl font-bold text-orange-700 font-mono">
-                {(10 * Math.log10(dp) + dg + 30).toFixed(1)} dBm
+                {(10 * Math.log10(r.dp) + r.dg + 30).toFixed(1)} dBm
               </p>
             </div>
           </div>
@@ -164,8 +206,8 @@ export default function RFDetectionRangePage() {
       )}
 
       {/* Sensitivity sweep table */}
-      {valid && (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-8">
+      {r !== null && (
+        <div className={`bg-white border border-gray-200 rounded-xl overflow-hidden mb-8 ${isDirty ? 'opacity-60' : ''}`}>
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 text-sm">Detection Range vs Receiver Sensitivity</h2>
           </div>
@@ -178,10 +220,10 @@ export default function RFDetectionRangePage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {sensLevels.map((s) => (
-                <tr key={s} className={s === rs ? 'bg-orange-50' : ''}>
+                <tr key={s} className={s === r.rs ? 'bg-orange-50' : ''}>
                   <td className="px-6 py-2 font-mono text-gray-700">{s} dBm</td>
                   <td className="px-6 py-2 font-mono text-gray-900 text-right font-semibold">
-                    {fmt(calcDetectionRange(dp, dg, f, s, rg))}
+                    {fmt(calcDetectionRange(r.dp, r.dg, r.f, s, r.rg))}
                   </td>
                 </tr>
               ))}
