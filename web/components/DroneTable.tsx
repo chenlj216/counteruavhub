@@ -23,6 +23,68 @@ function matchesBand(drone: DroneRecord, band: string): boolean {
   return haystack.includes(band.toLowerCase())
 }
 
+function exportToCSV(data: DroneRecord[], filename: string) {
+  const headers = ['Model', 'Brand', 'Category', 'Control Frequency', 'Video Protocol', 'Video Frequency', 'GPS Frequency', 'Max TX Power', 'Counter Frequency', 'Source', 'Source Type']
+  const csvContent = [
+    headers.join(','),
+    ...data.map(drone =>
+      [
+        `"${drone.name.replace(/"/g, '""')}"`,
+        `"${drone.brand.replace(/"/g, '""')}"`,
+        drone.category,
+        `"${drone.controlFreq.replace(/"/g, '""')}"`,
+        `"${drone.videoProtocol.replace(/"/g, '""')}"`,
+        `"${drone.videoFreq.replace(/"/g, '""')}"`,
+        `"${drone.gpsFreq.replace(/"/g, '""')}"`,
+        `"${drone.maxTxPower.replace(/"/g, '""')}"`,
+        `"${drone.counterFreq.replace(/"/g, '""')}"`,
+        `"${drone.source.replace(/"/g, '""')}"`,
+        drone.sourceTier,
+      ].join(',')
+    ),
+  ].join('\n')
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
+function exportToExcel(data: DroneRecord[], filename: string) {
+  const headers = ['Model', 'Brand', 'Category', 'Control Frequency', 'Video Protocol', 'Video Frequency', 'GPS Frequency', 'Max TX Power', 'Counter Frequency', 'Source', 'Source Type']
+
+  const rows = data.map(drone => [
+    drone.name,
+    drone.brand,
+    drone.category,
+    drone.controlFreq,
+    drone.videoProtocol,
+    drone.videoFreq,
+    drone.gpsFreq,
+    drone.maxTxPower,
+    drone.counterFreq,
+    drone.source,
+    drone.sourceTier,
+  ])
+
+  const sheet = [headers, ...rows]
+  const worksheet = sheet.map(row =>
+    row.map(cell => {
+      const str = String(cell ?? '')
+      return /[,"\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str
+    }).join('\t')
+  ).join('\n')
+
+  const blob = new Blob([worksheet], { type: 'application/vnd.ms-excel;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
 export default function DroneTable() {
   const [search, setSearch] = useState('')
   const [filterCategory, setFilterCategory] = useState<DroneCategory | ''>('')
@@ -83,10 +145,34 @@ export default function DroneTable() {
         </select>
       </div>
 
-      {/* Result count */}
-      <p className="text-sm text-gray-500">
-        Showing <span className="font-medium text-gray-800">{filtered.length}</span> of {drones.length} records
-      </p>
+      {/* Result count & Export buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-gray-500">
+          Showing <span className="font-medium text-gray-800">{filtered.length}</span> of {drones.length} records
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => exportToCSV(filtered, `drone-database-${new Date().toISOString().split('T')[0]}.csv`)}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            CSV
+          </button>
+          <button
+            onClick={() => exportToExcel(filtered, `drone-database-${new Date().toISOString().split('T')[0]}.xls`)}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Excel
+          </button>
+        </div>
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
