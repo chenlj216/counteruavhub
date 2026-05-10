@@ -14,7 +14,7 @@ export default function NewsPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Industry News</h1>
       <p className="text-gray-500 mb-10">
         Curated developments in counter-drone technology, UAV incidents, and regulations.
-        <span className="block text-xs mt-1 text-gray-400">Manually curated · Last updated April 2026</span>
+        <span className="block text-xs mt-1 text-gray-400">Manually curated · Last updated May 2026</span>
       </p>
 
       <div className="space-y-5">
