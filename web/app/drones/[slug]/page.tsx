@@ -197,7 +197,7 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
       {/* CTA */}
       <div className="mt-12 p-6 bg-blue-50 rounded-xl border border-blue-100">
         <p className="font-semibold text-blue-900 mb-2">Looking for more drone models?</p>
-        <p className="text-blue-700 text-sm mb-4">Search and filter RF parameters for 27+ drone models in our full Signal Database.</p>
+        <p className="text-blue-700 text-sm mb-4">Search and filter RF parameters for {drones.length}+ drone models in our full Signal Database.</p>
         <Link
           href="/tools/drone-frequency-database"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg text-sm transition-colors"

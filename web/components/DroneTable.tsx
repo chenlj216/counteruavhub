@@ -269,7 +269,7 @@ export default function DroneTable() {
 
       {/* Disclaimer */}
       <p className="text-xs text-gray-400 border-t pt-3">
-        Data sourced from official specifications and public records. Always verify before deployment. Last updated April 2026.
+        Data sourced from official specifications, public records, and source-monitored RF profiles. Always verify before deployment.
       </p>
     </div>
   )

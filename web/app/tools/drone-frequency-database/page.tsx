@@ -1,12 +1,15 @@
 import { Metadata } from 'next'
 import DroneTable from '@/components/DroneTable'
+import { drones } from '@/data/drones'
+
+const droneCount = drones.length
 
 export const metadata: Metadata = {
   title: 'Drone Frequency & Signal Database | CounterUAVHub',
-  description: 'Look up RF signal parameters for 25+ drone models including DJI, Autel, Parrot, and FPV systems. Find control frequencies, video protocols, and counter-drone jamming ranges.',
+  description: `Look up RF signal parameters for ${droneCount}+ drone models including DJI, Autel, Parrot, Skydio, industrial, tactical, and FPV systems. Find control frequencies, video protocols, and counter-drone jamming ranges.`,
   openGraph: {
     title: 'Drone Frequency & Signal Database',
-    description: 'RF signal parameters for 25+ drone models. Find control frequencies, video protocols, GPS bands, and recommended counter-drone frequencies.',
+    description: `RF signal parameters for ${droneCount}+ drone models. Find control frequencies, video protocols, GPS bands, and recommended counter-drone frequencies.`,
     url: 'https://counteruavhub.com/tools/drone-frequency-database',
   },
 }
@@ -20,7 +23,7 @@ export default function DroneFrequencyDatabasePage() {
           Drone Signal & Frequency Database
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl">
-          Search and filter RF signal parameters for consumer, industrial, FPV, and military drones.
+          Search and filter RF signal parameters for {droneCount}+ consumer, industrial, FPV, and military drones.
           Use this database to configure detection systems or identify jamming frequency requirements.
         </p>
       </div>

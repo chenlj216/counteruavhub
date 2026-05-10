@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:drones": "node --test scripts/drone-updater.test.mjs",
     "test:news": "node --test scripts/news-updater.test.mjs",
+    "update-drones": "node scripts/update-drones.mjs",
     "update-news": "node scripts/update-news.mjs"
   },
   "dependencies": {

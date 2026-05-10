@@ -1,0 +1,324 @@
+[
+  {
+    "brand": "DJI",
+    "name": "Mini 4 Pro",
+    "category": "consumer",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/mini-4-pro/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Air 3S",
+    "category": "consumer",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/air-3s/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Air 3",
+    "category": "consumer",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/air-3/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Avata 2",
+    "category": "fpv",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/avata-2/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Neo",
+    "category": "consumer",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/neo/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Matrice 4T",
+    "category": "industrial",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/matrice-4-series/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Matrice 4E",
+    "category": "industrial",
+    "rfProfile": "dji-o4-24-51-58",
+    "sourceUrl": "https://www.dji.com/matrice-4-series/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Mavic 3 Enterprise",
+    "category": "industrial",
+    "rfProfile": "dji-o3-24-58",
+    "sourceUrl": "https://enterprise.dji.com/mavic-3-enterprise/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Mavic 3 Thermal",
+    "category": "industrial",
+    "rfProfile": "dji-o3-24-58",
+    "sourceUrl": "https://enterprise.dji.com/mavic-3-enterprise/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Matrice 350 RTK",
+    "category": "industrial",
+    "rfProfile": "dji-o3-24-58",
+    "sourceUrl": "https://enterprise.dji.com/matrice-350-rtk/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Matrice 30T",
+    "category": "industrial",
+    "rfProfile": "dji-o3-24-58",
+    "sourceUrl": "https://enterprise.dji.com/matrice-30/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Phantom 4 Pro V2.0",
+    "category": "consumer",
+    "rfProfile": "dji-ocusync-24-58",
+    "sourceUrl": "https://www.dji.com/phantom-4-pro-v2/specs"
+  },
+  {
+    "brand": "DJI",
+    "name": "Inspire 3",
+    "category": "industrial",
+    "rfProfile": "dji-o3-24-58",
+    "sourceUrl": "https://www.dji.com/inspire-3/specs"
+  },
+  {
+    "brand": "Autel",
+    "name": "EVO Max 4T",
+    "category": "industrial",
+    "rfProfile": "autel-skylink-24-58",
+    "sourceUrl": "https://www.autelrobotics.com/productdetail/17.html"
+  },
+  {
+    "brand": "Autel",
+    "name": "EVO Max 4N",
+    "category": "industrial",
+    "rfProfile": "autel-skylink-24-58",
+    "sourceUrl": "https://www.autelrobotics.com/productdetail/18.html"
+  },
+  {
+    "brand": "Autel",
+    "name": "EVO II Pro V3",
+    "category": "industrial",
+    "rfProfile": "autel-skylink-24-58",
+    "sourceUrl": "https://www.autelrobotics.com/productdetail/10.html"
+  },
+  {
+    "brand": "Autel",
+    "name": "EVO Lite+",
+    "category": "consumer",
+    "rfProfile": "autel-skylink-24-58",
+    "sourceUrl": "https://www.autelrobotics.com/productdetail/3.html"
+  },
+  {
+    "brand": "Autel",
+    "name": "Dragonfish Lite",
+    "category": "industrial",
+    "rfProfile": "industrial-24-58-lte",
+    "sourceUrl": "https://www.autelrobotics.com/productdetail/8.html"
+  },
+  {
+    "brand": "Parrot",
+    "name": "ANAFI Ai",
+    "category": "industrial",
+    "rfProfile": "industrial-24-58-lte",
+    "sourceUrl": "https://www.parrot.com/us/drones/anafi-ai"
+  },
+  {
+    "brand": "Parrot",
+    "name": "ANAFI USA",
+    "category": "industrial",
+    "rfProfile": "parrot-wifi-24-58",
+    "sourceUrl": "https://www.parrot.com/us/drones/anafi-usa"
+  },
+  {
+    "brand": "Skydio",
+    "name": "X10",
+    "category": "industrial",
+    "rfProfile": "skydio-enterprise-24-58",
+    "sourceUrl": "https://www.skydio.com/x10"
+  },
+  {
+    "brand": "Skydio",
+    "name": "X2D",
+    "category": "military",
+    "rfProfile": "skydio-enterprise-24-58",
+    "sourceUrl": "https://www.skydio.com/skydio-x2"
+  },
+  {
+    "brand": "Yuneec",
+    "name": "H520E",
+    "category": "industrial",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.yuneec.com/en_US/products/commercial/h520e/overview.html"
+  },
+  {
+    "brand": "Yuneec",
+    "name": "Typhoon H Plus",
+    "category": "consumer",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.yuneec.com/en_US/products/consumer/typhoon-h-plus/overview.html"
+  },
+  {
+    "brand": "Wingtra",
+    "name": "WingtraOne GEN II",
+    "category": "industrial",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://wingtra.com/mapping-drone-wingtraone/"
+  },
+  {
+    "brand": "senseFly",
+    "name": "eBee X",
+    "category": "industrial",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://ageagle.com/drones/ebee-x/"
+  },
+  {
+    "brand": "AgEagle",
+    "name": "eBee TAC",
+    "category": "military",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://ageagle.com/drones/ebee-tac/"
+  },
+  {
+    "brand": "Freefly",
+    "name": "Alta X",
+    "category": "industrial",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://freeflysystems.com/alta-x"
+  },
+  {
+    "brand": "Sony",
+    "name": "Airpeak S1",
+    "category": "industrial",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://electronics.sony.com/more/airpeak/all-airpeak/p/ars-s1"
+  },
+  {
+    "brand": "Teledyne FLIR",
+    "name": "SIRAS",
+    "category": "industrial",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.flir.com/products/siras/"
+  },
+  {
+    "brand": "Inspired Flight",
+    "name": "IF800 Tomcat",
+    "category": "industrial",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://www.inspiredflight.com/if800-tomcat"
+  },
+  {
+    "brand": "Percepto",
+    "name": "Air Max OGI",
+    "category": "industrial",
+    "rfProfile": "industrial-24-58-lte",
+    "sourceUrl": "https://percepto.co/solutions/drone-in-a-box/"
+  },
+  {
+    "brand": "Quantum-Systems",
+    "name": "Vector AI",
+    "category": "military",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://quantum-systems.com/vector/"
+  },
+  {
+    "brand": "Quantum-Systems",
+    "name": "Trinity Pro",
+    "category": "industrial",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://quantum-systems.com/trinity-pro/"
+  },
+  {
+    "brand": "AeroVironment",
+    "name": "Puma 3 AE",
+    "category": "military",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://www.avinc.com/uas/puma-ae"
+  },
+  {
+    "brand": "AeroVironment",
+    "name": "Raven B",
+    "category": "military",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://www.avinc.com/uas/raven"
+  },
+  {
+    "brand": "Teal",
+    "name": "Teal 2",
+    "category": "military",
+    "rfProfile": "subghz-24-58",
+    "sourceUrl": "https://tealdrones.com/teal-2/"
+  },
+  {
+    "brand": "BRINC",
+    "name": "LEMUR 2",
+    "category": "industrial",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://brincdrones.com/lemur-2/"
+  },
+  {
+    "brand": "Flyability",
+    "name": "Elios 3",
+    "category": "industrial",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.flyability.com/elios-3"
+  },
+  {
+    "brand": "Matternet",
+    "name": "M2",
+    "category": "industrial",
+    "rfProfile": "industrial-24-58-lte",
+    "sourceUrl": "https://mttr.net/product/"
+  },
+  {
+    "brand": "Zipline",
+    "name": "Platform 2",
+    "category": "industrial",
+    "rfProfile": "industrial-24-58-lte",
+    "sourceUrl": "https://www.flyzipline.com/technology"
+  },
+  {
+    "brand": "FIMI",
+    "name": "X8SE 2022 V2",
+    "category": "consumer",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.fimi.com/fimi-x8se-2022-v2.html"
+  },
+  {
+    "brand": "Hubsan",
+    "name": "Zino Mini Pro",
+    "category": "consumer",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.hubsan.com"
+  },
+  {
+    "brand": "Potensic",
+    "name": "Atom",
+    "category": "consumer",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.potensic.com/products/atom"
+  },
+  {
+    "brand": "Holy Stone",
+    "name": "HS720R",
+    "category": "consumer",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://www.holystone.com"
+  },
+  {
+    "brand": "Ruko",
+    "name": "F11GIM2",
+    "category": "consumer",
+    "rfProfile": "wifi-24-58",
+    "sourceUrl": "https://rukotoy.com"
+  }
+]
