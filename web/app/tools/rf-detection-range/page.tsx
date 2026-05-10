@@ -72,7 +72,7 @@ export default function RFDetectionRangePage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">RF Detection Range Calculator</h1>
         <p className="text-gray-600 text-sm">
-          Calculates the maximum distance at which a passive RF sensor can detect a drone's
+          Calculates the maximum distance at which a passive RF sensor can detect a drone&apos;s
           transmitter. Based on the Friis transmission equation with drone EIRP and receiver
           sensitivity as inputs.
         </p>

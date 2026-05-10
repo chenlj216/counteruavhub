@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { Fragment, useState, useMemo } from 'react'
 import { drones, brands, categories, type DroneRecord, type DroneCategory } from '@/data/drones'
 
 const FREQ_BANDS = ['433MHz', '868MHz', '900MHz', '2.4GHz', '5GHz', '5.8GHz', 'LTE'] as const
@@ -195,9 +195,8 @@ export default function DroneTable() {
               </tr>
             )}
             {filtered.map((drone) => (
-              <>
+              <Fragment key={drone.id}>
                 <tr
-                  key={drone.id}
                   className="hover:bg-gray-50 cursor-pointer"
                   onClick={() => setExpanded(expanded === drone.id ? null : drone.id)}
                 >
@@ -262,7 +261,7 @@ export default function DroneTable() {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
