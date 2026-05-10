@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:news": "node --test scripts/news-updater.test.mjs",
+    "update-news": "node scripts/update-news.mjs"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
