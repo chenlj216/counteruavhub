@@ -4,8 +4,11 @@ import assert from 'node:assert/strict'
 import {
   buildNewsItem,
   categorizeNews,
+  fetchAllNewsArticles,
+  fetchGoogleNewsRssArticles,
   filterRelevantArticles,
   mergeNewsItems,
+  parseRssItems,
   slugifyId,
   updateNewsData,
 } from './news-updater.mjs'
@@ -108,4 +111,82 @@ test('keeps existing data when fetch fails and fallback is enabled', async () =>
   })
 
   assert.deepEqual(updated, existing)
+})
+
+test('parseRssItems reads Google News-style RSS items with source and date', () => {
+  const xml = `<?xml version="1.0"?>
+    <rss><channel>
+      <item>
+        <title>Airport deploys counter-drone detection system</title>
+        <link>https://news.google.com/rss/articles/example</link>
+        <pubDate>Mon, 11 May 2026 03:30:00 GMT</pubDate>
+        <source url="https://example.com">Example Aviation</source>
+      </item>
+    </channel></rss>`
+
+  const items = parseRssItems(xml)
+
+  assert.equal(items.length, 1)
+  assert.equal(items[0].title, 'Airport deploys counter-drone detection system')
+  assert.equal(items[0].source, 'Example Aviation')
+  assert.equal(items[0].date, '2026-05-11')
+})
+
+test('fetchGoogleNewsRssArticles builds article records from RSS text', async () => {
+  const articles = await fetchGoogleNewsRssArticles({
+    url: 'https://news.google.com/rss/search?q=counter-UAS',
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => `<rss><channel><item><title>C-UAS market expands</title><link>https://example.com/cuas</link><pubDate>Mon, 11 May 2026 01:00:00 GMT</pubDate><source>Defense Daily</source></item></channel></rss>`,
+    }),
+  })
+
+  assert.deepEqual(articles, [
+    {
+      title: 'C-UAS market expands',
+      url: 'https://example.com/cuas',
+      source: 'Defense Daily',
+      date: '2026-05-11',
+    },
+  ])
+})
+
+test('fetchAllNewsArticles combines successful sources and ignores one failed source', async () => {
+  const articles = await fetchAllNewsArticles({
+    sources: [
+      {
+        name: 'bad',
+        fetchArticles: async () => {
+          throw new Error('source down')
+        },
+      },
+      {
+        name: 'good',
+        fetchArticles: async () => [
+          { title: 'Counter-UAS testing expands', url: 'https://example.com/a', source: 'Example', date: '2026-05-11' },
+        ],
+      },
+    ],
+  })
+
+  assert.equal(articles.length, 1)
+  assert.equal(articles[0].title, 'Counter-UAS testing expands')
+})
+
+test('fetchAllNewsArticles throws when every source fails', async () => {
+  await assert.rejects(
+    () => fetchAllNewsArticles({
+      sources: [
+        {
+          name: 'bad',
+          fetchArticles: async () => {
+            throw new Error('source down')
+          },
+        },
+      ],
+    }),
+    /All news sources failed/
+  )
 })

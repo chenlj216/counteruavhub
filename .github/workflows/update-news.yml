@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Update news candidates
-        run: npm run update-news -- --write --allow-fetch-failure --max-new=8 --limit=80
+        run: npm run update-news -- --write --max-new=12 --limit=100
 
       - name: Test news updater
         run: npm run test:news

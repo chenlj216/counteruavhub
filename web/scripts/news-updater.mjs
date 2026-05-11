@@ -5,11 +5,23 @@ import { fileURLToPath } from 'node:url'
 export const NEWS_CATEGORIES = ['incident', 'technology', 'regulation', 'military', 'market']
 
 const DEFAULT_QUERY = [
-  '("counter-UAS" OR "counter drone" OR "counter-drone" OR "drone detection" OR "drone restriction" OR "unauthorized drone" OR "Remote ID")',
-  '(domain:faa.gov OR domain:cisa.gov OR domain:army.mil OR domain:defense.gov OR domain:droneshield.com OR domain:anduril.com OR domain:epirusinc.com OR domain:hensoldt.net OR domain:dedrone.com OR domain:axon.com)',
+  '("counter-UAS" OR "counter drone" OR "counter-drone" OR "C-UAS" OR "anti-drone" OR "drone detection" OR "drone restriction" OR "unauthorized drone" OR "Remote ID")',
 ].join(' ')
 
 const DEFAULT_GDELT_ENDPOINT = 'https://api.gdeltproject.org/api/v2/doc/doc'
+const DEFAULT_GDELT_QUERIES = [
+  DEFAULT_QUERY,
+  '("drone incursion" OR "unauthorized drone" OR "drone sighting") ("airport" OR "critical infrastructure" OR "stadium" OR "prison")',
+  '("drone jamming" OR "RF jamming" OR "drone spoofing" OR "GNSS spoofing" OR "Remote ID")',
+  '("counter unmanned aerial" OR "UAS mitigation" OR "drone defense" OR "drone warfare")',
+]
+
+const DEFAULT_RSS_QUERIES = [
+  'counter-UAS OR counter-drone when:2d',
+  '"drone detection" OR "unauthorized drone" when:2d',
+  '"drone jamming" OR "Remote ID" OR "GNSS spoofing" when:7d',
+  '"anti-drone" OR "drone defense" OR "UAS mitigation" when:7d',
+]
 
 const SOURCE_BY_DOMAIN = new Map([
   ['faa.gov', 'FAA'],
@@ -22,6 +34,14 @@ const SOURCE_BY_DOMAIN = new Map([
   ['hensoldt.net', 'HENSOLDT'],
   ['dedrone.com', 'Dedrone'],
   ['axon.com', 'AXON'],
+  ['breakingdefense.com', 'Breaking Defense'],
+  ['defensenews.com', 'Defense News'],
+  ['janes.com', 'Janes'],
+  ['reuters.com', 'Reuters'],
+  ['thedefensepost.com', 'The Defense Post'],
+  ['twz.com', 'The War Zone'],
+  ['thedrive.com', 'The War Zone'],
+  ['uasvision.com', 'UAS Vision'],
 ])
 
 const RELEVANT_TERMS = [
@@ -42,9 +62,18 @@ const RELEVANT_TERMS = [
   'remote id',
   'rf detection',
   'rf jamming',
+  'drone jamming',
+  'gnss spoofing',
   'jamming',
   'c-uas',
   'cuas',
+  'uas mitigation',
+  'counter unmanned aerial',
+  'drone defense',
+  'drone warfare',
+  'drone threat',
+  'airspace security',
+  'critical infrastructure',
 ]
 
 const CATEGORY_KEYWORDS = {
@@ -57,6 +86,17 @@ const CATEGORY_KEYWORDS = {
 
 function normalizeText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim()
+}
+
+function decodeXmlEntities(value) {
+  return normalizeText(value)
+    .replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
 }
 
 export function slugifyId(title, date) {
@@ -104,6 +144,14 @@ function sourceFromUrl(url) {
 
   const suffix = [...SOURCE_BY_DOMAIN.keys()].find((domain) => host.endsWith(`.${domain}`))
   return suffix ? SOURCE_BY_DOMAIN.get(suffix) : host || 'Source'
+}
+
+function dateFromAny(value) {
+  const raw = normalizeText(value)
+  if (!raw) return new Date().toISOString().slice(0, 10)
+  const parsed = new Date(raw)
+  if (!Number.isNaN(parsed.valueOf())) return parsed.toISOString().slice(0, 10)
+  return dateFromGdelt(raw)
 }
 
 function dateFromGdelt(value) {
@@ -193,6 +241,52 @@ export function normalizeGdeltArticle(article) {
   }
 }
 
+function googleNewsRssUrl(query) {
+  const url = new URL('https://news.google.com/rss/search')
+  url.searchParams.set('q', query)
+  url.searchParams.set('hl', 'en-US')
+  url.searchParams.set('gl', 'US')
+  url.searchParams.set('ceid', 'US:en')
+  return url.toString()
+}
+
+function extractTag(block, tag) {
+  const match = block.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))
+  return match ? decodeXmlEntities(match[1]) : ''
+}
+
+export function parseRssItems(xml) {
+  const itemBlocks = [...String(xml).matchAll(/<item\b[\s\S]*?<\/item>/gi)].map((match) => match[0])
+
+  return itemBlocks.map((block) => {
+    const link = extractTag(block, 'link')
+    const source = extractTag(block, 'source') || sourceFromUrl(link)
+    return {
+      title: extractTag(block, 'title'),
+      url: link,
+      source,
+      date: dateFromAny(extractTag(block, 'pubDate')),
+    }
+  }).filter((item) => item.title && item.url)
+}
+
+export async function fetchGoogleNewsRssArticles({
+  query,
+  url,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  if (!fetchImpl) {
+    throw new Error('This Node.js runtime does not provide fetch.')
+  }
+
+  const response = await fetchImpl(url || googleNewsRssUrl(query))
+  if (!response.ok) {
+    throw new Error(`Google News RSS request failed: ${response.status} ${response.statusText}`)
+  }
+
+  return parseRssItems(await response.text())
+}
+
 export async function fetchGdeltArticles({
   query = DEFAULT_QUERY,
   endpoint = DEFAULT_GDELT_ENDPOINT,
@@ -219,9 +313,53 @@ export async function fetchGdeltArticles({
   return Array.isArray(payload.articles) ? payload.articles.map(normalizeGdeltArticle) : []
 }
 
+export function defaultNewsSources() {
+  const sources = DEFAULT_GDELT_QUERIES.map((query, index) => ({
+    name: `gdelt-${index + 1}`,
+    fetchArticles: () => fetchGdeltArticles({ query, maxRecords: 30 }),
+  }))
+
+  for (const [index, query] of DEFAULT_RSS_QUERIES.entries()) {
+    sources.push({
+      name: `google-news-rss-${index + 1}`,
+      fetchArticles: () => fetchGoogleNewsRssArticles({ query }),
+    })
+  }
+
+  return sources
+}
+
+export async function fetchAllNewsArticles({ sources = defaultNewsSources() } = {}) {
+  const articles = []
+  const failures = []
+  let successCount = 0
+
+  for (const source of sources) {
+    try {
+      const result = await source.fetchArticles()
+      successCount += 1
+      articles.push(...result)
+      console.log(`News source ${source.name}: ${result.length} article(s)`)
+    } catch (error) {
+      failures.push(`${source.name}: ${error.message}`)
+      console.warn(`News source ${source.name} failed: ${error.message}`)
+    }
+  }
+
+  if (successCount === 0) {
+    throw new Error(`All news sources failed. ${failures.join(' | ')}`)
+  }
+
+  if (failures.length) {
+    console.warn(`News update continued with ${failures.length} failed source(s).`)
+  }
+
+  return articles
+}
+
 export async function updateNewsData({
   existingItems,
-  fetchArticles = fetchGdeltArticles,
+  fetchArticles = fetchAllNewsArticles,
   allowFetchFailure = false,
   maxNew = 8,
   limit = 80,
