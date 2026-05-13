@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   buildDroneRecordFromCatalogEntry,
+  buildCandidatesFromCatalog,
   extractSignalHints,
   mergeDroneRecords,
   slugifyDroneId,
@@ -88,4 +89,62 @@ test('mergeDroneRecords adds new records without replacing official existing dat
   assert.equal(merged.length, 2)
   assert.equal(merged.find((item) => item.id === 'dji-mavic-3-pro').source, 'DJI Official Specs')
   assert.ok(merged.some((item) => item.id === 'skydio-x10'))
+})
+
+test('buildCandidatesFromCatalog continues with profile fallback when one source fails and another succeeds', async () => {
+  const catalog = [
+    {
+      brand: 'DJI',
+      name: 'Air 3',
+      category: 'consumer',
+      rfProfile: 'dji-o4-24-51-58',
+      sourceUrl: 'https://example.com/air-3',
+    },
+    {
+      brand: 'Autel',
+      name: 'EVO Max 4T',
+      category: 'industrial',
+      rfProfile: 'autel-skylink-24-58',
+      sourceUrl: 'https://example.com/evo-max-4t',
+    },
+  ]
+
+  const candidates = await buildCandidatesFromCatalog(catalog, {
+    allowFetchFailure: true,
+    minSuccessfulFetches: 1,
+    fetchImpl: async (url) => {
+      if (String(url).includes('air-3')) {
+        return {
+          ok: true,
+          text: async () => 'Operating Frequency 2.400-2.4835 GHz and 5.725-5.850 GHz. Video Transmission DJI O4.',
+        }
+      }
+      throw new Error('source down')
+    },
+  })
+
+  assert.equal(candidates.length, 2)
+  assert.deepEqual(candidates[0].controlFreqMHz, [2400, 5800])
+  assert.deepEqual(candidates[1].controlFreqMHz, [2400, 5800])
+})
+
+test('buildCandidatesFromCatalog throws when all monitored sources fail below the required success threshold', async () => {
+  await assert.rejects(
+    () => buildCandidatesFromCatalog([
+      {
+        brand: 'DJI',
+        name: 'Air 3',
+        category: 'consumer',
+        rfProfile: 'dji-o4-24-51-58',
+        sourceUrl: 'https://example.com/air-3',
+      },
+    ], {
+      allowFetchFailure: true,
+      minSuccessfulFetches: 1,
+      fetchImpl: async () => {
+        throw new Error('network down')
+      },
+    }),
+    /Drone source health check failed/
+  )
 })

@@ -23,12 +23,14 @@ GitHub Actions 文件：
 
 1. 读取 `web/data/drone-source-catalog.json`
 2. 尝试访问每个型号的官方或厂商页面
-3. 从页面文本中抽取频段、视频链路、GNSS、发射功率线索
-4. 如果厂商页面 403、404、超时或网络失败，则使用目录中的 RF profile 兜底
+3. 从页面文本中抽取频段、视频链路、GNSS、发射功率线索，并输出每个来源的抓取状态
+4. 如果个别厂商页面 403、404、超时或网络失败，则使用目录中的 RF profile 兜底
 5. 合并到 `web/data/drones.json`
 6. 运行测试、类型检查、lint、静态构建
 7. 如 `web/data/drones.json` 有变化，则直接提交到 main
 8. Cloudflare Pages 自动部署
+
+线上 workflow 使用 `--min-source-success=1`。如果所有厂商来源都抓取失败，任务会失败，避免把“来源全挂了”误判为“今天没有型号更新”。
 
 ## 数据文件
 
@@ -50,6 +52,12 @@ npm run update-drones
 
 ```bash
 npm run update-drones -- --write --allow-fetch-failure
+```
+
+如果希望本地也启用来源健康检查：
+
+```bash
+npm run update-drones -- --write --allow-fetch-failure --min-source-success=1
 ```
 
 验证：
@@ -74,6 +82,6 @@ npm run build
 
 ## 注意事项
 
-很多厂商官网会对 GitHub Actions 或本机自动访问返回 403、404、超时或反爬失败。脚本会记录失败，并使用目录中的 RF profile 兜底，避免自动更新中断。
+很多厂商官网会对 GitHub Actions 或本机自动访问返回 403、404、超时或反爬失败。脚本会记录失败，并使用目录中的 RF profile 兜底，避免个别来源失败导致自动更新中断。但如果所有来源都失败，workflow 会失败并报警。
 
 字段中涉及 RF 频段、发射功率和链路带宽时，自动抽取只能作为公开资料整理线索。真实部署前仍应以厂商规格书、FCC/CE 文件或实测为准。

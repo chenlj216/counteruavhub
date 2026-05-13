@@ -12,6 +12,7 @@ function readArgs(argv) {
   const args = {
     write: false,
     allowFetchFailure: false,
+    minSuccessfulFetches: 0,
     file: defaultDronesJsonPath(),
     catalog: defaultCatalogPath(),
   }
@@ -19,6 +20,7 @@ function readArgs(argv) {
   for (const arg of argv) {
     if (arg === '--write') args.write = true
     if (arg === '--allow-fetch-failure') args.allowFetchFailure = true
+    if (arg.startsWith('--min-source-success=')) args.minSuccessfulFetches = Number(arg.split('=')[1])
     if (arg.startsWith('--file=')) args.file = arg.split('=').slice(1).join('=')
     if (arg.startsWith('--catalog=')) args.catalog = arg.split('=').slice(1).join('=')
   }
@@ -34,6 +36,7 @@ async function main() {
     existingRecords,
     catalog,
     allowFetchFailure: args.allowFetchFailure,
+    minSuccessfulFetches: args.minSuccessfulFetches,
   })
 
   const existingIds = new Set(existingRecords.map((record) => record.id))

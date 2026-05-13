@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Update drone model candidates
-        run: npm run update-drones -- --write --allow-fetch-failure
+        run: npm run update-drones -- --write --allow-fetch-failure --min-source-success=1
 
       - name: Test drone updater
         run: npm run test:drones

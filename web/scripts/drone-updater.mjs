@@ -259,16 +259,29 @@ export async function fetchText(url, fetchImpl = globalThis.fetch) {
   }
 }
 
-export async function buildCandidatesFromCatalog(catalog, { fetchImpl = globalThis.fetch, allowFetchFailure = false } = {}) {
+export async function buildCandidatesFromCatalog(catalog, {
+  fetchImpl = globalThis.fetch,
+  allowFetchFailure = false,
+  minSuccessfulFetches = 0,
+} = {}) {
   const candidates = []
+  const stats = {
+    attempted: 0,
+    succeeded: 0,
+    failed: 0,
+  }
 
   for (const entry of catalog) {
     let hints = {}
     if (entry.sourceUrl) {
+      stats.attempted += 1
       try {
         const text = await fetchText(entry.sourceUrl, fetchImpl)
         hints = extractSignalHints(text)
+        stats.succeeded += 1
+        console.log(`Drone source ${entry.name}: fetched (${Object.keys(hints).length} hint field group(s))`)
       } catch (error) {
+        stats.failed += 1
         if (!allowFetchFailure) throw error
         console.warn(`Drone source fetch failed for ${entry.name}; using catalog profile. ${error.message}`)
       }
@@ -276,11 +289,23 @@ export async function buildCandidatesFromCatalog(catalog, { fetchImpl = globalTh
     candidates.push(buildDroneRecordFromCatalogEntry(entry, hints))
   }
 
+  console.log(`Drone source summary: ${stats.succeeded}/${stats.attempted} fetched, ${stats.failed} failed, ${candidates.length} catalog candidate(s).`)
+
+  if (stats.attempted > 0 && stats.succeeded < minSuccessfulFetches) {
+    throw new Error(`Drone source health check failed: ${stats.succeeded}/${stats.attempted} source fetches succeeded, minimum required is ${minSuccessfulFetches}.`)
+  }
+
   return candidates
 }
 
-export async function updateDroneData({ existingRecords, catalog, fetchImpl, allowFetchFailure = false } = {}) {
-  const candidates = await buildCandidatesFromCatalog(catalog, { fetchImpl, allowFetchFailure })
+export async function updateDroneData({
+  existingRecords,
+  catalog,
+  fetchImpl,
+  allowFetchFailure = false,
+  minSuccessfulFetches = 0,
+} = {}) {
+  const candidates = await buildCandidatesFromCatalog(catalog, { fetchImpl, allowFetchFailure, minSuccessfulFetches })
   return mergeDroneRecords(existingRecords, candidates)
 }
 
