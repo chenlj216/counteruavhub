@@ -15,11 +15,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!drone) return {}
   return {
     title: `${drone.name} RF Frequency & Signal Parameters`,
-    description: `Complete RF signal parameters for the ${drone.name}. Control frequency: ${drone.controlFreq}, video protocol: ${drone.videoProtocol}, GPS bands, and recommended counter-drone frequencies.`,
-    keywords: `${drone.name} frequency, ${drone.name} RF parameters, ${drone.brand} drone frequency, ${drone.name} signal, counter ${drone.name}`,
+    description: `Public RF signal parameters for the ${drone.name}. Control frequency: ${drone.controlFreq}, video protocol: ${drone.videoProtocol}, GNSS bands, and relevant counter-UAS planning bands.`,
+    keywords: `${drone.name} frequency, ${drone.name} RF parameters, ${drone.brand} drone frequency, ${drone.name} signal, counter-UAS planning`,
     openGraph: {
       title: `${drone.name} RF Frequency & Signal Parameters`,
-      description: `Control: ${drone.controlFreq} | Video: ${drone.videoProtocol} | Counter: ${drone.counterFreq}`,
+      description: `Control: ${drone.controlFreq} | Video: ${drone.videoProtocol} | RF planning bands: ${drone.counterFreq}`,
       type: 'article',
     },
   }
