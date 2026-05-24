@@ -2,12 +2,14 @@ import { MetadataRoute } from 'next'
 
 export const dynamic = 'force-static'
 import { drones } from '@/data/drones'
+import { getBrandSummaries } from '@/lib/brand-pages.mjs'
 import { FREQUENCY_BANDS } from '@/lib/frequency-bands.mjs'
 import { getBlogPosts } from '@/lib/blog'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://counteruavhub.com'
   const posts = await getBlogPosts()
+  const brandSummaries = getBrandSummaries(drones)
 
   const static_pages: MetadataRoute.Sitemap = [
     { url: base, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
@@ -42,5 +44,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...static_pages, ...blog_pages, ...drone_pages]
+  const brand_pages: MetadataRoute.Sitemap = brandSummaries.map((brand) => ({
+    url: `${base}/brands/${brand.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.75,
+  }))
+
+  return [...static_pages, ...blog_pages, ...drone_pages, ...brand_pages]
 }

@@ -15,6 +15,7 @@ A vertical SEO tool site covering counter-drone and anti-UAV technology:
 - **Technical Blog** — in-depth articles on drone frequencies, jamming, RF detection, GNSS, and sensor fusion
 - **Industry News** — automated counter-UAS news aggregation
 - **Frequency SEO Pages** — static landing pages for 2.4GHz, 5.8GHz, and GNSS bands
+- **Brand SEO Pages** — static landing pages for indexed drone brands, with source confidence labels
 
 ## Project structure
 

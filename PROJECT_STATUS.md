@@ -33,6 +33,8 @@
 - [x] 无人机型号数据库自动更新（GitHub Actions -> data/drones.json -> main -> Cloudflare）
 - [x] GA 关键事件埋点（数据库搜索/筛选/导出、记录展开、计算器预设）
 - [x] 第一批频段 SEO 聚合页（/bands/2-4ghz、/bands/5-8ghz、/bands/gnss）
+- [x] 品牌 SEO 聚合页（全部 26 个品牌静态页，含 /brands/dji、/brands/autel、/brands/parrot）
+- [x] 数据可信度标识（数据库表格、型号详情页、品牌页）
 - [x] 构建验证通过（npm run build）
 
 ### 当前数据快照
@@ -43,7 +45,8 @@
 | 新闻条目 | 100 |
 | 博客文章 | 12 |
 | 频段 SEO 页 | 3 |
-| 静态生成页面 | 123 |
+| 品牌 SEO 页 | 26 |
+| 静态生成页面 | 149 |
 
 ### 待完成 / 下一阶段
 
@@ -52,7 +55,7 @@
 - [ ] 冷启动社区分发包（Reddit / Hacker News / LinkedIn）
 - [ ] GA / Search Console 数据快照记录模板
 - [ ] 新闻热点转原创英文技术分析文章流程
-- [ ] 无人机数据源可信度分层抽检（官方 / FCC / 第三方 / profile fallback）
+- [ ] Top 30 型号源链接和 RF 字段人工抽检（官方 / FCC / 第三方 / profile fallback）
 
 ---
 

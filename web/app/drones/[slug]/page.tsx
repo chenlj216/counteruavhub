@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { drones, DroneRecord } from '@/data/drones'
+import { getBrandSlug } from '@/lib/brand-pages.mjs'
+import { DATASET_REVIEWED_LABEL, getSourceConfidence, isEstimatedSource } from '@/lib/source-confidence.mjs'
 
 export async function generateStaticParams() {
   return drones.map((d) => ({ slug: d.id }))
@@ -37,18 +39,6 @@ const CATEGORY_COLOR: Record<string, string> = {
   military: 'bg-red-100 text-red-800',
 }
 
-const SOURCE_COLOR: Record<string, string> = {
-  official: 'bg-green-100 text-green-800',
-  fcc: 'bg-blue-100 text-blue-800',
-  'third-party': 'bg-yellow-100 text-yellow-800',
-}
-
-const SOURCE_LABEL: Record<string, string> = {
-  official: 'Official Spec',
-  fcc: 'FCC Filing',
-  'third-party': 'Third-Party',
-}
-
 function RelatedDrones({ current }: { current: DroneRecord }) {
   const related = drones
     .filter((d) => d.id !== current.id && (d.brand === current.brand || d.category === current.category))
@@ -78,11 +68,14 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
   const drone = drones.find((d) => d.id === slug)
   if (!drone) notFound()
 
+  const confidence = getSourceConfidence(drone)
+  const estimated = isEstimatedSource(drone)
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
     headline: `${drone.name} RF Frequency & Signal Parameters`,
-    description: `Control frequency: ${drone.controlFreq}, Video protocol: ${drone.videoProtocol}, Counter-drone frequencies: ${drone.counterFreq}`,
+    description: `Control frequency: ${drone.controlFreq}, Video protocol: ${drone.videoProtocol}, relevant RF planning bands: ${drone.counterFreq}`,
     about: { '@type': 'Product', name: drone.name, brand: { '@type': 'Brand', name: drone.brand } },
     publisher: { '@type': 'Organization', name: 'CounterUAVHub', url: 'https://counteruavhub.com' },
   }
@@ -111,17 +104,19 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="text-sm font-medium text-gray-500">{drone.brand}</span>
+          <Link href={`/brands/${getBrandSlug(drone.brand)}`} className="text-sm font-medium text-gray-500 hover:text-blue-600">
+            {drone.brand}
+          </Link>
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${CATEGORY_COLOR[drone.category]}`}>
             {CATEGORY_LABEL[drone.category]}
           </span>
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${SOURCE_COLOR[drone.sourceTier]}`}>
-            {SOURCE_LABEL[drone.sourceTier]}
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${confidence.badgeClassName}`}>
+            {confidence.level}
           </span>
         </div>
         <h1 className="text-3xl font-bold text-gray-900">{drone.name} — RF Signal Parameters</h1>
         <p className="mt-3 text-gray-600">
-          Complete RF frequency and signal parameters for the {drone.name}, including control link, video downlink, GPS bands, and recommended counter-drone frequencies.
+          Public RF frequency and signal parameters for the {drone.name}, including control link, video downlink, GPS bands, and relevant counter-UAS planning bands.
         </p>
       </div>
 
@@ -142,13 +137,13 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
         </table>
       </div>
 
-      {/* Counter-Drone Guidance */}
+      {/* Counter-UAS Planning */}
       <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
         <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-          <span className="text-red-500">⚡</span> Counter-Drone Target Frequencies
+          <span className="text-red-500">⚡</span> Authorized Counter-UAS Planning Bands
         </h2>
         <p className="text-sm text-gray-600 mb-3">
-          To detect or suppress the {drone.name}, RF systems should cover the following frequency ranges:
+          For lawful RF monitoring, lab validation, or controlled counter-UAS planning, compare system coverage against these public reference bands:
         </p>
         <p className="font-mono text-base font-semibold text-red-800 bg-red-100 rounded-lg px-4 py-3">
           {drone.counterFreq}
@@ -159,8 +154,8 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
             <p className="text-gray-600">Configure scan range to include {drone.controlFreq} for signal identification.</p>
           </div>
           <div className="bg-white rounded-lg p-3 border border-red-100">
-            <p className="font-semibold text-gray-800 mb-1">Jamming / Suppression</p>
-            <p className="text-gray-600">Target {drone.counterFreq} to disrupt control and video links.</p>
+            <p className="font-semibold text-gray-800 mb-1">Mitigation Planning</p>
+            <p className="text-gray-600">Use {drone.counterFreq} as a reference for authorized coverage checks and compliance review.</p>
           </div>
         </div>
         <div className="mt-4 pt-4 border-t border-red-100 flex flex-wrap gap-3">
@@ -168,13 +163,13 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
             href={`/tools/jammer-calculator?drone=${drone.id}`}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-700 bg-white border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg transition-colors"
           >
-            Analyze Jamming Effectiveness →
+            Open RF Planning Calculator →
           </Link>
         </div>
       </div>
 
       {/* Source */}
-      <div className="text-sm text-gray-500 border-t border-gray-100 pt-6 mb-8">
+      <div className="text-sm text-gray-500 border-t border-gray-100 pt-6 mb-8 space-y-4">
         <p>
           <span className="font-medium text-gray-700">Data source:</span> {drone.source}
           {drone.sourceUrl && (
@@ -186,8 +181,26 @@ export default async function DroneDetailPage({ params }: { params: Promise<{ sl
             </>
           )}
         </p>
-        <p className="mt-1 text-xs text-gray-400">
-          Always verify frequency data before operational deployment. Specifications may vary by region and firmware version.
+        <div className={`rounded-lg border p-4 ${confidence.panelClassName}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Data Confidence</p>
+              <p className="font-semibold text-gray-900">{confidence.label}</p>
+            </div>
+            <span className={`self-start sm:self-center text-xs font-semibold px-2 py-0.5 rounded-full ${confidence.badgeClassName}`}>
+              {confidence.level}
+            </span>
+          </div>
+          <p className="text-xs text-gray-600 mt-2">{confidence.note}</p>
+          <p className="text-xs text-gray-500 mt-1">Dataset reviewed: {DATASET_REVIEWED_LABEL}</p>
+          {estimated && (
+            <p className="text-xs text-yellow-800 mt-2">
+              This record should be treated as a planning estimate until confirmed against official documentation or regulatory evidence.
+            </p>
+          )}
+        </div>
+        <p className="text-xs text-gray-400">
+          Always verify frequency data before field use. Specifications may vary by region, firmware version, antenna configuration, and operating mode.
         </p>
       </div>
 

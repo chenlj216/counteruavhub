@@ -3,6 +3,7 @@
 import { Fragment, useState, useMemo } from 'react'
 import { drones, brands, categories, type DroneRecord, type DroneCategory } from '@/data/drones'
 import { trackEvent } from '@/lib/analytics.mjs'
+import { DATASET_REVIEWED_LABEL, getSourceConfidence, isEstimatedSource } from '@/lib/source-confidence.mjs'
 
 const FREQ_BANDS = ['433MHz', '868MHz', '900MHz', '2.4GHz', '5GHz', '5.8GHz', 'LTE'] as const
 
@@ -13,23 +14,19 @@ const CATEGORY_LABELS: Record<DroneCategory, string> = {
   military: 'Military',
 }
 
-const SOURCE_BADGE: Record<string, { label: string; className: string }> = {
-  official: { label: 'Official', className: 'bg-green-100 text-green-800' },
-  fcc: { label: 'FCC', className: 'bg-blue-100 text-blue-800' },
-  'third-party': { label: '3rd Party', className: 'bg-yellow-100 text-yellow-800' },
-}
-
 function matchesBand(drone: DroneRecord, band: string): boolean {
   const haystack = [drone.controlFreq, drone.videoFreq, drone.gpsFreq].join(' ').toLowerCase()
   return haystack.includes(band.toLowerCase())
 }
 
 function exportToCSV(data: DroneRecord[], filename: string) {
-  const headers = ['Model', 'Brand', 'Category', 'Control Frequency', 'Video Protocol', 'Video Frequency', 'GPS Frequency', 'Max TX Power', 'Counter Frequency', 'Source', 'Source Type']
+  const headers = ['Model', 'Brand', 'Category', 'Control Frequency', 'Video Protocol', 'Video Frequency', 'GPS Frequency', 'Max TX Power', 'Relevant RF Bands', 'Source', 'Source Confidence']
   const csvContent = [
     headers.join(','),
-    ...data.map(drone =>
-      [
+    ...data.map((drone) => {
+      const confidence = getSourceConfidence(drone)
+
+      return [
         `"${drone.name.replace(/"/g, '""')}"`,
         `"${drone.brand.replace(/"/g, '""')}"`,
         drone.category,
@@ -40,9 +37,9 @@ function exportToCSV(data: DroneRecord[], filename: string) {
         `"${drone.maxTxPower.replace(/"/g, '""')}"`,
         `"${drone.counterFreq.replace(/"/g, '""')}"`,
         `"${drone.source.replace(/"/g, '""')}"`,
-        drone.sourceTier,
+        `"${confidence.label.replace(/"/g, '""')}"`,
       ].join(',')
-    ),
+    }),
   ].join('\n')
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -54,21 +51,25 @@ function exportToCSV(data: DroneRecord[], filename: string) {
 }
 
 function exportToExcel(data: DroneRecord[], filename: string) {
-  const headers = ['Model', 'Brand', 'Category', 'Control Frequency', 'Video Protocol', 'Video Frequency', 'GPS Frequency', 'Max TX Power', 'Counter Frequency', 'Source', 'Source Type']
+  const headers = ['Model', 'Brand', 'Category', 'Control Frequency', 'Video Protocol', 'Video Frequency', 'GPS Frequency', 'Max TX Power', 'Relevant RF Bands', 'Source', 'Source Confidence']
 
-  const rows = data.map(drone => [
-    drone.name,
-    drone.brand,
-    drone.category,
-    drone.controlFreq,
-    drone.videoProtocol,
-    drone.videoFreq,
-    drone.gpsFreq,
-    drone.maxTxPower,
-    drone.counterFreq,
-    drone.source,
-    drone.sourceTier,
-  ])
+  const rows = data.map((drone) => {
+    const confidence = getSourceConfidence(drone)
+
+    return [
+      drone.name,
+      drone.brand,
+      drone.category,
+      drone.controlFreq,
+      drone.videoProtocol,
+      drone.videoFreq,
+      drone.gpsFreq,
+      drone.maxTxPower,
+      drone.counterFreq,
+      drone.source,
+      confidence.label,
+    ]
+  })
 
   const sheet = [headers, ...rows]
   const worksheet = sheet.map(row =>
@@ -251,8 +252,8 @@ export default function DroneTable() {
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Category</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Control Freq</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Video Protocol</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-600">Counter Freq</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-600">Source</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-600">Relevant Bands</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-600">Confidence</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -262,7 +263,11 @@ export default function DroneTable() {
                 <td colSpan={7} className="px-4 py-8 text-center text-gray-400">No results found. Try adjusting your filters.</td>
               </tr>
             )}
-            {filtered.map((drone) => (
+            {filtered.map((drone) => {
+              const confidence = getSourceConfidence(drone)
+              const estimated = isEstimatedSource(drone)
+
+              return (
               <Fragment key={drone.id}>
                 <tr
                   className="hover:bg-gray-50 cursor-pointer"
@@ -278,8 +283,8 @@ export default function DroneTable() {
                   <td className="px-4 py-3 text-gray-700">{drone.videoProtocol}</td>
                   <td className="px-4 py-3 font-medium text-red-700">{drone.counterFreq}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${SOURCE_BADGE[drone.sourceTier].className}`}>
-                      {SOURCE_BADGE[drone.sourceTier].label}
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${confidence.badgeClassName}`}>
+                      {confidence.level}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-400 text-xs">
@@ -321,12 +326,30 @@ export default function DroneTable() {
                             ) : drone.source}
                           </p>
                         </div>
+                        <div className={`md:col-span-2 rounded p-3 border ${confidence.panelClassName}`}>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div>
+                              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Data Confidence</p>
+                              <p className="text-sm font-semibold text-gray-900">{confidence.label}</p>
+                            </div>
+                            <span className={`self-start sm:self-center text-xs font-semibold px-2 py-0.5 rounded-full ${confidence.badgeClassName}`}>
+                              {confidence.level}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-2">{confidence.note}</p>
+                          <p className="text-xs text-gray-500 mt-1">Dataset reviewed: {DATASET_REVIEWED_LABEL}</p>
+                          {estimated && (
+                            <p className="text-xs text-yellow-800 mt-2">
+                              Treat this row as a planning estimate until confirmed against an official or regulatory source.
+                            </p>
+                          )}
+                        </div>
                         <div className="md:col-span-2 border-t pt-3 mt-1">
-                          <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Counter-Drone Guidance</p>
+                          <p className="text-gray-500 text-xs uppercase tracking-wide mb-2">Authorized RF Planning</p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div className="bg-white rounded p-3 border border-blue-100">
-                              <p className="text-xs font-semibold text-blue-700 mb-1">Selecting jamming equipment?</p>
-                              <p className="text-xs text-gray-600">Ensure coverage includes: <span className="font-medium">{drone.counterFreq}</span></p>
+                              <p className="text-xs font-semibold text-blue-700 mb-1">Planning spectrum coverage?</p>
+                              <p className="text-xs text-gray-600">Compare site-approved coverage against: <span className="font-medium">{drone.counterFreq}</span></p>
                             </div>
                             <div className="bg-white rounded p-3 border border-blue-100">
                               <p className="text-xs font-semibold text-blue-700 mb-1">Configuring RF detection?</p>
@@ -339,7 +362,8 @@ export default function DroneTable() {
                   </tr>
                 )}
               </Fragment>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>

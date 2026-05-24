@@ -2,9 +2,11 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import DroneTable from '@/components/DroneTable'
 import { drones } from '@/data/drones'
+import { getBrandSummaries } from '@/lib/brand-pages.mjs'
 import { FREQUENCY_BANDS } from '@/lib/frequency-bands.mjs'
 
 const droneCount = drones.length
+const topBrandGuides = getBrandSummaries(drones).slice(0, 6)
 
 export const metadata: Metadata = {
   title: 'Drone Frequency & Signal Database',
@@ -26,7 +28,7 @@ export default function DroneFrequencyDatabasePage() {
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl">
           Search and filter RF signal parameters for {droneCount}+ consumer, industrial, FPV, and military drones.
-          Use this database to configure detection systems or identify jamming frequency requirements.
+          Use this database for RF monitoring plans, link-budget research, and authorized counter-UAS assessments.
         </p>
       </div>
 
@@ -53,6 +55,29 @@ export default function DroneFrequencyDatabasePage() {
             >
               <p className="font-semibold text-gray-900 text-sm">{band.shortLabel}</p>
               <p className="text-xs text-gray-500 mt-1">{band.primaryUse}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="font-semibold text-gray-900 mb-3 text-sm">Brand RF guides</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {topBrandGuides.map((brand) => (
+            <Link
+              key={brand.slug}
+              href={`/brands/${brand.slug}`}
+              className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{brand.brand}</p>
+                  <p className="text-xs text-gray-500 mt-1">{brand.topCategory} records</p>
+                </div>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                  {brand.count}
+                </span>
+              </div>
             </Link>
           ))}
         </div>

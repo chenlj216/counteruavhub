@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:drones": "node --test scripts/drone-updater.test.mjs",
     "test:news": "node --test scripts/news-updater.test.mjs",
-    "test:site": "node --test scripts/analytics.test.mjs scripts/frequency-bands.test.mjs",
+    "test:site": "node --test scripts/analytics.test.mjs scripts/frequency-bands.test.mjs scripts/brand-pages.test.mjs scripts/source-confidence.test.mjs",
     "update-drones": "node scripts/update-drones.mjs",
     "update-news": "node scripts/update-news.mjs"
   },
