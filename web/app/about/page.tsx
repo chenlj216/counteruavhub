@@ -1,8 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { drones } from '@/data/drones'
 
 export const metadata: Metadata = {
-  title: 'About — CounterUAVHub',
+  title: 'About',
   description: 'CounterUAVHub is a technical reference platform for counter-drone professionals, engineers, and security researchers.',
 }
 
@@ -19,7 +20,7 @@ export default function AboutPage() {
 
         <h2 className="text-xl font-bold text-gray-900 mt-8">What we provide</h2>
         <ul className="space-y-2">
-          <li><strong>Drone Signal Database</strong> — RF signal parameters for 25+ drone models, including control frequencies, video protocols, GPS bands, and recommended counter-drone frequencies.</li>
+          <li><strong>Drone Signal Database</strong> — RF signal parameters for {drones.length}+ drone models, including control frequencies, video protocols, GPS bands, and recommended counter-drone frequencies.</li>
           <li><strong>Technical Articles</strong> — In-depth guides on drone frequencies, jamming technology, and RF detection systems.</li>
           <li><strong>Industry News</strong> — Aggregated news from FlightGlobal, The War Zone, Drone DJ, and other industry sources.</li>
         </ul>

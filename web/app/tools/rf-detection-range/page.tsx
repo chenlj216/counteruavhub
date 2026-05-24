@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { trackEvent } from '@/lib/analytics.mjs'
 
 const C = 3e8
 
@@ -89,6 +90,11 @@ export default function RFDetectionRangePage() {
               <button key={p.label}
                 onClick={() => {
                   setDronePow(String(p.power)); setDroneGain(String(p.gain)); setFreqMHz(String(p.freq))
+                  trackEvent('calculator_preset_click', {
+                    calculator: 'rf_detection_range',
+                    preset_type: 'drone_transmitter',
+                    preset_value: p.label,
+                  })
                 }}
                 className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-orange-100 text-gray-600 hover:text-orange-700 transition-colors">
                 {p.label}
@@ -128,6 +134,11 @@ export default function RFDetectionRangePage() {
               <button key={p.label}
                 onClick={() => {
                   setRxSens(String(p.sens)); setRxGain(String(p.gain))
+                  trackEvent('calculator_preset_click', {
+                    calculator: 'rf_detection_range',
+                    preset_type: 'receiver',
+                    preset_value: p.label,
+                  })
                 }}
                 className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors">
                 {p.label}

@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getBlogPost, getBlogPosts } from '@/lib/blog'
+import { drones } from '@/data/drones'
 import { remark } from 'remark'
 import remarkHtml from 'remark-html'
 
@@ -58,7 +59,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
       <div className="mt-12 p-6 bg-blue-50 rounded-xl border border-blue-100">
         <p className="font-semibold text-blue-900 mb-2">Looking for specific drone frequencies?</p>
-        <p className="text-blue-700 text-sm mb-4">Use our Signal Database to look up RF parameters for 25+ drone models.</p>
+        <p className="text-blue-700 text-sm mb-4">Use our Signal Database to look up RF parameters for {drones.length}+ drone models.</p>
         <Link href="/tools/drone-frequency-database" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg text-sm transition-colors">
           Open Signal Database →
         </Link>

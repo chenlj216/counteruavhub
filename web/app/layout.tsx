@@ -3,6 +3,7 @@ import Script from 'next/script'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { drones } from '@/data/drones'
 
 export const metadata: Metadata = {
   title: {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     template: '%s | CounterUAVHub',
   },
   description:
-    'Technical reference platform for counter-drone professionals. Look up drone RF frequencies, signal protocols, and jamming parameters for 25+ models.',
+    `Technical reference platform for counter-drone professionals. Look up drone RF frequencies, signal protocols, and jamming parameters for ${drones.length}+ models.`,
   metadataBase: new URL('https://counteruavhub.com'),
   openGraph: {
     siteName: 'CounterUAVHub',

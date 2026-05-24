@@ -2,6 +2,7 @@
 
 import { Fragment, useState, useMemo } from 'react'
 import { drones, brands, categories, type DroneRecord, type DroneCategory } from '@/data/drones'
+import { trackEvent } from '@/lib/analytics.mjs'
 
 const FREQ_BANDS = ['433MHz', '868MHz', '900MHz', '2.4GHz', '5GHz', '5.8GHz', 'LTE'] as const
 
@@ -102,6 +103,69 @@ export default function DroneTable() {
     })
   }, [search, filterCategory, filterBrand, filterBand])
 
+  function trackSearchCommit(value: string) {
+    const searchTerm = value.trim()
+    if (!searchTerm) return
+
+    trackEvent('drone_database_search', {
+      search_term: searchTerm,
+      result_count: filtered.length,
+    })
+  }
+
+  function updateCategory(value: DroneCategory | '') {
+    setFilterCategory(value)
+    trackEvent('drone_database_filter', {
+      filter_type: 'category',
+      filter_value: value || 'all',
+    })
+  }
+
+  function updateBrand(value: string) {
+    setFilterBrand(value)
+    trackEvent('drone_database_filter', {
+      filter_type: 'brand',
+      filter_value: value || 'all',
+    })
+  }
+
+  function updateBand(value: string) {
+    setFilterBand(value)
+    trackEvent('drone_database_filter', {
+      filter_type: 'band',
+      filter_value: value || 'all',
+    })
+  }
+
+  function downloadCSV() {
+    trackEvent('drone_database_export', {
+      export_format: 'csv',
+      record_count: filtered.length,
+    })
+    exportToCSV(filtered, `drone-database-${new Date().toISOString().split('T')[0]}.csv`)
+  }
+
+  function downloadExcel() {
+    trackEvent('drone_database_export', {
+      export_format: 'excel',
+      record_count: filtered.length,
+    })
+    exportToExcel(filtered, `drone-database-${new Date().toISOString().split('T')[0]}.xls`)
+  }
+
+  function toggleExpanded(drone: DroneRecord) {
+    const nextExpanded = expanded === drone.id ? null : drone.id
+    setExpanded(nextExpanded)
+
+    if (nextExpanded) {
+      trackEvent('drone_database_record_open', {
+        drone_id: drone.id,
+        brand: drone.brand,
+        category: drone.category,
+      })
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Filters */}
@@ -111,11 +175,15 @@ export default function DroneTable() {
           placeholder="Search model or brand..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onBlur={(e) => trackSearchCommit(e.currentTarget.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') trackSearchCommit(e.currentTarget.value)
+          }}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <select
           value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value as DroneCategory | '')}
+          onChange={(e) => updateCategory(e.target.value as DroneCategory | '')}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Categories</option>
@@ -125,7 +193,7 @@ export default function DroneTable() {
         </select>
         <select
           value={filterBrand}
-          onChange={(e) => setFilterBrand(e.target.value)}
+          onChange={(e) => updateBrand(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Brands</option>
@@ -135,7 +203,7 @@ export default function DroneTable() {
         </select>
         <select
           value={filterBand}
-          onChange={(e) => setFilterBand(e.target.value)}
+          onChange={(e) => updateBand(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Frequency Bands</option>
@@ -152,7 +220,7 @@ export default function DroneTable() {
         </p>
         <div className="flex gap-2">
           <button
-            onClick={() => exportToCSV(filtered, `drone-database-${new Date().toISOString().split('T')[0]}.csv`)}
+            onClick={downloadCSV}
             disabled={filtered.length === 0}
             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
@@ -162,7 +230,7 @@ export default function DroneTable() {
             CSV
           </button>
           <button
-            onClick={() => exportToExcel(filtered, `drone-database-${new Date().toISOString().split('T')[0]}.xls`)}
+            onClick={downloadExcel}
             disabled={filtered.length === 0}
             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
@@ -198,7 +266,7 @@ export default function DroneTable() {
               <Fragment key={drone.id}>
                 <tr
                   className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => setExpanded(expanded === drone.id ? null : drone.id)}
+                  onClick={() => toggleExpanded(drone)}
                 >
                   <td className="px-4 py-3 font-medium text-gray-900">{drone.name}</td>
                   <td className="px-4 py-3 text-gray-600">
@@ -238,7 +306,16 @@ export default function DroneTable() {
                           <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Data Source</p>
                           <p className="text-gray-800">
                             {drone.sourceUrl ? (
-                              <a href={drone.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              <a
+                                href={drone.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => trackEvent('drone_source_click', {
+                                  drone_id: drone.id,
+                                  source_tier: drone.sourceTier,
+                                })}
+                                className="text-blue-600 hover:underline"
+                              >
                                 {drone.source}
                               </a>
                             ) : drone.source}

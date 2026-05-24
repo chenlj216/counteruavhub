@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { drones } from '@/data/drones'
+import { trackEvent } from '@/lib/analytics.mjs'
 
 const C = 3e8
 
@@ -94,6 +95,12 @@ export default function JammerCalculatorPage() {
     setSPow(String(newSp))
     setSGain('2')
     setDroneBW(String(newDbw))
+    trackEvent('calculator_drone_model_select', {
+      calculator: 'jammer_effectiveness',
+      drone_id: drone.id,
+      brand: drone.brand,
+      category: drone.category,
+    })
   }
 
   function selectBand(idx: number) {
@@ -101,6 +108,11 @@ export default function JammerCalculatorPage() {
     setSelectedBandIdx(idx)
     const newF = selectedDrone.controlFreqMHz[idx]
     setFreq(String(newF))
+    trackEvent('calculator_band_select', {
+      calculator: 'jammer_effectiveness',
+      drone_id: selectedDrone.id,
+      frequency_mhz: newF,
+    })
   }
 
   const jp = parseFloat(jPow), jg = parseFloat(jGain), jd = parseFloat(jDist)
@@ -236,7 +248,14 @@ export default function JammerCalculatorPage() {
               {!selectedDrone && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {FREQ_PRESETS.map((fp) => (
-                    <button key={fp.v} onClick={() => setFreq(fp.v)}
+                    <button key={fp.v} onClick={() => {
+                      setFreq(fp.v)
+                      trackEvent('calculator_preset_click', {
+                        calculator: 'jammer_effectiveness',
+                        preset_type: 'frequency',
+                        preset_value: fp.v,
+                      })
+                    }}
                       className="text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
                       {fp.label}
                     </button>
@@ -251,7 +270,14 @@ export default function JammerCalculatorPage() {
                 className={`${INPUT_CLS} focus:ring-red-400`} />
               <div className="flex flex-wrap gap-1 mt-1">
                 {JBW_PRESETS.map((p) => (
-                  <button key={p.v} onClick={() => setJBW(p.v)}
+                  <button key={p.v} onClick={() => {
+                    setJBW(p.v)
+                    trackEvent('calculator_preset_click', {
+                      calculator: 'jammer_effectiveness',
+                      preset_type: 'jammer_bandwidth',
+                      preset_value: p.v,
+                    })
+                  }}
                     className="text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-red-100 text-gray-600 hover:text-red-700 transition-colors">
                     {p.label}
                   </button>
@@ -308,7 +334,14 @@ export default function JammerCalculatorPage() {
                 className={`${INPUT_CLS} focus:ring-blue-500`} />
               <div className="flex flex-wrap gap-1 mt-1">
                 {DBW_PRESETS.map((p) => (
-                  <button key={p.v} onClick={() => setDroneBW(p.v)}
+                  <button key={p.v} onClick={() => {
+                    setDroneBW(p.v)
+                    trackEvent('calculator_preset_click', {
+                      calculator: 'jammer_effectiveness',
+                      preset_type: 'control_channel_bandwidth',
+                      preset_value: p.v,
+                    })
+                  }}
                     className="text-xs px-2 py-0.5 rounded bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors">
                     {p.label}
                   </button>

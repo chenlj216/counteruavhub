@@ -17,7 +17,7 @@ export default async function HomePage() {
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Look up RF signal parameters, frequency bands, and counter-drone specifications
-            for 25+ drone models. Built for engineers, security professionals, and researchers.
+            for {drones.length}+ drone models. Built for engineers, security professionals, and researchers.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -132,7 +132,7 @@ export default async function HomePage() {
           Need frequency data for a specific drone?
         </h2>
         <p className="text-gray-600 mb-6">
-          Search our database of 25+ models including DJI, Autel, Parrot, Skydio, and FPV protocols.
+          Search our database of {drones.length}+ models including DJI, Autel, Parrot, Skydio, and FPV protocols.
         </p>
         <Link
           href="/tools/drone-frequency-database"

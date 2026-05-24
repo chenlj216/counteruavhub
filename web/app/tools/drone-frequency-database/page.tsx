@@ -1,11 +1,13 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 import DroneTable from '@/components/DroneTable'
 import { drones } from '@/data/drones'
+import { FREQUENCY_BANDS } from '@/lib/frequency-bands.mjs'
 
 const droneCount = drones.length
 
 export const metadata: Metadata = {
-  title: 'Drone Frequency & Signal Database | CounterUAVHub',
+  title: 'Drone Frequency & Signal Database',
   description: `Look up RF signal parameters for ${droneCount}+ drone models including DJI, Autel, Parrot, Skydio, industrial, tactical, and FPV systems. Find control frequencies, video protocols, and counter-drone jamming ranges.`,
   openGraph: {
     title: 'Drone Frequency & Signal Database',
@@ -37,6 +39,22 @@ export default function DroneFrequencyDatabasePage() {
         <div className="bg-orange-50 rounded-lg p-4 border border-orange-100">
           <h2 className="font-semibold text-orange-800 mb-1 text-sm">Know the frequency band?</h2>
           <p className="text-sm text-orange-700">Filter by frequency band to see all drone models operating in that range — useful for configuring RF detection systems.</p>
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h2 className="font-semibold text-gray-900 mb-3 text-sm">Frequency band guides</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {FREQUENCY_BANDS.map((band) => (
+            <Link
+              key={band.slug}
+              href={`/bands/${band.slug}`}
+              className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+            >
+              <p className="font-semibold text-gray-900 text-sm">{band.shortLabel}</p>
+              <p className="text-xs text-gray-500 mt-1">{band.primaryUse}</p>
+            </Link>
+          ))}
         </div>
       </div>
 

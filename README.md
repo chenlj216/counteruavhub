@@ -2,17 +2,19 @@
 
 Counter-drone technical reference platform for engineers, security professionals, and researchers.
 
-**Domain:** counteruavhub.com  
-**Stack:** Next.js 14 · TypeScript · Tailwind CSS · Cloudflare Pages  
-**Status:** MVP development — target launch 2026-04-25
+**Domain:** counteruavhub.com
+**Stack:** Next.js 16 · TypeScript · Tailwind CSS · Cloudflare Pages
+**Status:** Post-MVP growth validation
 
 ## What this is
 
 A vertical SEO tool site covering counter-drone and anti-UAV technology:
 
-- **Drone Signal Database** — RF parameters for 25+ drone models (control freq, video protocol, GPS, counter-freq)
-- **Technical Blog** — in-depth articles on drone frequencies, jamming, and RF detection
-- **Industry News** — aggregated from FlightGlobal, The War Zone, Drone DJ
+- **Drone Signal Database** — RF parameters for 90+ drone models (control freq, video protocol, GPS, counter-freq)
+- **RF Calculators** — jammer effectiveness, RF detection range, and FSPL tools
+- **Technical Blog** — in-depth articles on drone frequencies, jamming, RF detection, GNSS, and sensor fusion
+- **Industry News** — automated counter-UAS news aggregation
+- **Frequency SEO Pages** — static landing pages for 2.4GHz, 5.8GHz, and GNSS bands
 
 ## Project structure
 
@@ -21,8 +23,9 @@ counteruavhub/
 ├── web/                  # Next.js app (Cloudflare Pages)
 │   ├── app/              # App Router pages
 │   ├── components/       # UI components
-│   ├── data/drones.ts    # Drone frequency database
+│   ├── data/             # JSON-backed drone/news data and TS exports
 │   ├── content/blog/     # Markdown articles
+│   ├── scripts/          # News/drone update scripts and tests
 │   └── lib/              # Utilities
 ├── 00-项目启动.md
 ├── 02-PRD.md
@@ -38,6 +41,10 @@ counteruavhub/
 cd web
 npm install
 npm run dev      # localhost:3000
+npm run lint
+npm run test:news
+npm run test:drones
+npm run test:site
 npm run build    # static export to out/
 ```
 

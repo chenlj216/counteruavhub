@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 
 export const dynamic = 'force-static'
 import { drones } from '@/data/drones'
+import { FREQUENCY_BANDS } from '@/lib/frequency-bands.mjs'
 import { getBlogPosts } from '@/lib/blog'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -19,6 +20,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/tools/js-ratio-calculator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/tools/rf-detection-range`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/tools/fspl-calculator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    ...FREQUENCY_BANDS.map((band) => ({
+      url: `${base}/bands/${band.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    })),
   ]
 
   const blog_pages: MetadataRoute.Sitemap = posts.map((p) => ({

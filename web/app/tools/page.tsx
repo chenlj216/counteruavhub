@@ -1,8 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { drones } from '@/data/drones'
 
 export const metadata: Metadata = {
-  title: 'Counter-Drone RF Tools | CounterUAVHub',
+  title: 'Counter-Drone RF Tools',
   description:
     'Engineering calculators for counter-drone professionals. Compute jammer effective range, J/S ratio, RF detection range, and free space path loss.',
   openGraph: {
@@ -18,7 +19,7 @@ const tools = [
     href: '/tools/drone-frequency-database',
     title: 'Drone Signal Database',
     description:
-      'RF signal parameters for 27+ drone models — control frequency, video protocol, GPS bands, and recommended counter frequencies.',
+      `RF signal parameters for ${drones.length}+ drone models — control frequency, video protocol, GPS bands, and recommended counter frequencies.`,
     badge: 'Database',
     badgeColor: 'bg-blue-100 text-blue-800',
     icon: '📡',

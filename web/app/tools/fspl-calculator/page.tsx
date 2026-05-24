@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { trackEvent } from '@/lib/analytics.mjs'
 
 function calcFSPL(distanceM: number, freqMHz: number): number {
   // FSPL (dB) = 20·log10(d_m) + 20·log10(f_Hz) − 147.55
@@ -74,7 +75,14 @@ export default function FSPLCalculatorPage() {
               {FREQ_PRESETS.map((p) => (
                 <button
                   key={p.value}
-                  onClick={() => setFreqMHz(String(p.value))}
+                  onClick={() => {
+                    setFreqMHz(String(p.value))
+                    trackEvent('calculator_preset_click', {
+                      calculator: 'fspl',
+                      preset_type: 'frequency',
+                      preset_value: String(p.value),
+                    })
+                  }}
                   className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-blue-100 text-gray-600 hover:text-blue-700 transition-colors"
                 >
                   {p.label}
