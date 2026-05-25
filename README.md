@@ -11,7 +11,7 @@ Counter-drone technical reference platform for engineers, security professionals
 A vertical SEO tool site covering counter-drone and anti-UAV technology:
 
 - **Drone Signal Database** — RF parameters for 90+ drone models (control freq, video protocol, GPS, counter-freq)
-- **RF Calculators** — jammer effectiveness, RF detection range, and FSPL tools
+- **RF Calculators** — jammer effectiveness, RF detection coverage planning, RF detection range, and FSPL tools
 - **Technical Blog** — in-depth articles on drone frequencies, jamming, RF detection, GNSS, and sensor fusion
 - **Industry News** — automated counter-UAS news aggregation
 - **Frequency SEO Pages** — static landing pages for 2.4GHz, 5.8GHz, and GNSS bands

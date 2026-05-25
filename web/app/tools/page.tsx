@@ -19,7 +19,7 @@ const tools = [
     href: '/tools/drone-frequency-database',
     title: 'Drone Signal Database',
     description:
-      `RF signal parameters for ${drones.length}+ drone models — control frequency, video protocol, GPS bands, and recommended counter frequencies.`,
+      `RF signal parameters for ${drones.length}+ drone models — control frequency, video protocol, GNSS bands, and relevant RF planning bands.`,
     badge: 'Database',
     badgeColor: 'bg-blue-100 text-blue-800',
     icon: '📡',
@@ -28,10 +28,19 @@ const tools = [
     href: '/tools/jammer-calculator',
     title: 'Jammer Effectiveness Calculator',
     description:
-      'Unified J/S ratio and effective range analysis. Enter the scenario geometry to get both the jamming ratio at your current position and the maximum range at which jamming succeeds. Includes FHSS bandwidth penalty.',
+      'Unified J/S ratio and authorized mitigation planning analysis. Enter scenario geometry to estimate received signal balance, effective range, and FHSS bandwidth penalty.',
     badge: 'Calculator',
     badgeColor: 'bg-red-100 text-red-800',
     icon: '⚡',
+  },
+  {
+    href: '/tools/rf-detection-coverage-planner',
+    title: 'RF Detection Coverage Planner',
+    description:
+      'Estimate passive RF sensor coverage from drone signal presets, receiver sensitivity, site geometry, radio horizon, environment loss, and multi-sensor overlap.',
+    badge: 'Planner',
+    badgeColor: 'bg-orange-100 text-orange-800',
+    icon: '📶',
   },
   {
     href: '/tools/rf-detection-range',

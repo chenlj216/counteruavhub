@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Fragment, useState, useMemo } from 'react'
 import { drones, brands, categories, type DroneRecord, type DroneCategory } from '@/data/drones'
 import { trackEvent } from '@/lib/analytics.mjs'
@@ -356,6 +357,16 @@ export default function DroneTable() {
                               <p className="text-xs text-gray-600">Scan range should include: <span className="font-medium">{drone.counterFreq}</span></p>
                             </div>
                           </div>
+                          <Link
+                            href={`/tools/rf-detection-coverage-planner?drone=${drone.id}`}
+                            onClick={() => trackEvent('drone_database_tool_cta_click', {
+                              drone_id: drone.id,
+                              target_url: '/tools/rf-detection-coverage-planner',
+                            })}
+                            className="inline-flex mt-3 text-xs font-semibold text-blue-700 hover:text-blue-800"
+                          >
+                            Plan passive RF detection coverage →
+                          </Link>
                         </div>
                       </div>
                     </td>

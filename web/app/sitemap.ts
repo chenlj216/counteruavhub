@@ -20,6 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/tools`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/tools/jammer-range-calculator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/tools/js-ratio-calculator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/tools/rf-detection-coverage-planner`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
     { url: `${base}/tools/rf-detection-range`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/tools/fspl-calculator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     ...FREQUENCY_BANDS.map((band) => ({

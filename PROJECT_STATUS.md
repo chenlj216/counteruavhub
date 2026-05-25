@@ -17,7 +17,7 @@
 - [x] Next.js 项目初始化
 - [x] 无人机信号数据库（92 条记录，JSON 数据源 + TS 导出）
 - [x] 核心工具页（/tools/drone-frequency-database）
-- [x] 工程计算器（J/S、RF detection range、FSPL）
+- [x] 工程计算器（J/S、RF detection range、RF detection coverage planner、FSPL）
 - [x] 首页
 - [x] 博客系统（列表页 + 详情页）
 - [x] 12 篇 SEO / 技术文章
@@ -35,6 +35,7 @@
 - [x] 第一批频段 SEO 聚合页（/bands/2-4ghz、/bands/5-8ghz、/bands/gnss）
 - [x] 品牌 SEO 聚合页（全部 26 个品牌静态页，含 /brands/dji、/brands/autel、/brands/parrot）
 - [x] 数据可信度标识（数据库表格、型号详情页、品牌页）
+- [x] RF Detection Coverage Planner（链路预算、无线电地平线、多传感器覆盖面积、站内入口）
 - [x] 构建验证通过（npm run build）
 
 ### 当前数据快照
@@ -46,7 +47,7 @@
 | 博客文章 | 12 |
 | 频段 SEO 页 | 3 |
 | 品牌 SEO 页 | 26 |
-| 静态生成页面 | 149 |
+| 静态生成页面 | 150 |
 
 ### 待完成 / 下一阶段
 

@@ -188,6 +188,12 @@ export default async function BrandPage({ params }: { params: Promise<{ brand: s
           conservative RF profiles. Always confirm the exact regional model, firmware, antenna setup,
           and legal authority before using any RF reference in the field.
         </p>
+        <Link
+          href="/tools/rf-detection-coverage-planner"
+          className="inline-flex mt-4 text-sm font-semibold text-orange-700 hover:text-orange-800"
+        >
+          Open RF Detection Coverage Planner →
+        </Link>
       </section>
     </main>
   )

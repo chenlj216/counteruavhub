@@ -149,6 +149,12 @@ export default async function FrequencyBandPage({ params }: { params: Promise<{ 
           Frequency presence alone does not identify a drone or authorize countermeasure use.
           Always verify against official documentation, local regulations, and controlled test data before deployment.
         </p>
+        <Link
+          href="/tools/rf-detection-coverage-planner"
+          className="inline-flex mt-4 text-sm font-semibold text-orange-700 hover:text-orange-800"
+        >
+          Plan passive RF detection coverage for this band →
+        </Link>
       </section>
     </main>
   )
