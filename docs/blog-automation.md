@@ -2,9 +2,9 @@
 
 ## 当前策略
 
-博客技术文章采用“服务器定时触发 -> OpenClaw 北斗 Agent 生成英文技术草稿 -> 项目脚本校验 -> 写入状态文件并在服务器日志中输出审核摘要”的方式。
+博客技术文章采用“服务器定时触发 -> Hermes default profile（北斗运行体系）生成英文技术草稿 -> 项目脚本校验 -> 写入状态文件并在服务器日志中输出审核摘要”的方式。
 
-当前版本暂时放弃 Telegram 推送，只生成草稿、状态文件和日志摘要，不自动发布到 `main`，也不修改 OpenClaw gateway、agent systemd 配置。
+当前版本暂时放弃 Telegram 推送，只生成草稿、状态文件和日志摘要，不自动发布到 `main`，也不修改 Hermes gateway、agent systemd 配置。
 
 ## 服务器路径
 
@@ -14,13 +14,13 @@
 /root/.openclaw/workspace/projects/counteruavhub
 ```
 
-该路径在 OpenClaw workspace 下，但本自动化只修改 CounterUAVHub 项目内部文件，不写入 OpenClaw 顶层工作区配置。
+该路径在 OpenClaw workspace 下，但本自动化只修改 CounterUAVHub 项目内部文件，不写入 Hermes/OpenClaw 顶层工作区配置。
 
 ## 本地模块
 
 - `web/scripts/blog-context-builder.mjs`：读取 `news.json`、`drones.json` 和现有博客，生成候选选题上下文。
 - `web/scripts/blog-draft-validator.mjs`：校验 Markdown frontmatter、重复 slug、安全边界和站内链接。
-- `scripts/server/blog-draft-review-runner.py`：服务器侧编排脚本，负责调用 OpenClaw `main`（北斗）Agent、写草稿、校验、构建、写状态文件和输出审核摘要。
+- `scripts/server/blog-draft-review-runner.py`：服务器侧编排脚本，负责调用 Hermes `default` profile、写草稿、校验、构建、写状态文件和输出审核摘要。
 
 ## 安全边界
 
@@ -54,7 +54,7 @@ npm run validate-blog-draft -- content/blog/example.md
 
 ## 服务器 dry run
 
-dry run 不调用北斗 Agent、不写草稿：
+dry run 不调用 Hermes、不写草稿：
 
 ```bash
 cd /root/.openclaw/workspace/projects/counteruavhub
@@ -74,6 +74,18 @@ python3 scripts/server/blog-draft-review-runner.py
 
 ```bash
 python3 scripts/server/blog-draft-review-runner.py --skip-build
+```
+
+默认调用：
+
+```bash
+/root/.local/bin/hermes --profile default chat -Q -q "<prompt>"
+```
+
+如果服务器上的 Hermes 路径或 profile 不同，可以显式覆盖：
+
+```bash
+python3 scripts/server/blog-draft-review-runner.py --hermes-bin /root/.local/bin/hermes --hermes-profile default
 ```
 
 ## 状态检查

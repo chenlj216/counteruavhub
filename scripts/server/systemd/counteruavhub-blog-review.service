@@ -1,5 +1,5 @@
 [Unit]
-Description=CounterUAVHub Beidou blog draft review
+Description=CounterUAVHub Hermes blog draft review
 Wants=network-online.target
 After=network-online.target
 

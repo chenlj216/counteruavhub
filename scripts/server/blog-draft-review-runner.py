@@ -22,8 +22,9 @@ from pathlib import Path
 
 DEFAULT_PROJECT_ROOT = Path("/root/.openclaw/workspace/projects/counteruavhub")
 DEFAULT_STATUS_DIR = Path("var/blog-automation")
-OPENCLAW_AGENT = "main"
-OPENCLAW_SESSION_PREFIX = "counteruavhub_blog"
+HERMES_BIN = Path("/root/.local/bin/hermes")
+HERMES_PROFILE = "default"
+HERMES_SESSION_PREFIX = "counteruavhub_blog"
 
 
 class RunnerError(RuntimeError):
@@ -102,12 +103,12 @@ Context JSON:
 """.strip()
 
 
-def extract_openclaw_text(payload: object) -> str:
+def extract_agent_text(payload: object) -> str:
     if isinstance(payload, str):
         return payload
 
     if isinstance(payload, list):
-        parts = [extract_openclaw_text(item) for item in payload]
+        parts = [extract_agent_text(item) for item in payload]
         return "\n".join(part for part in parts if part.strip())
 
     if isinstance(payload, dict):
@@ -123,18 +124,18 @@ def extract_openclaw_text(payload: object) -> str:
         )
         for key in preferred_keys:
             if key in payload:
-                text = extract_openclaw_text(payload[key])
+                text = extract_agent_text(payload[key])
                 if text.strip():
                     return text
 
-        parts = [extract_openclaw_text(value) for value in payload.values()]
+        parts = [extract_agent_text(value) for value in payload.values()]
         return "\n".join(part for part in parts if part.strip())
 
     return ""
 
 
-def dispatch_openclaw_task(project_root: Path, context: dict, timeout: int) -> tuple[dict, str]:
-    session_id = f"{OPENCLAW_SESSION_PREFIX}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+def dispatch_hermes_task(project_root: Path, context: dict, timeout: int, hermes_bin: Path, hermes_profile: str) -> tuple[dict, str]:
+    session_id = f"{HERMES_SESSION_PREFIX}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     prompt = build_agent_prompt(context)
 
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=project_root, prefix=".blog-agent-prompt-", suffix=".txt", delete=False) as handle:
@@ -144,17 +145,13 @@ def dispatch_openclaw_task(project_root: Path, context: dict, timeout: int) -> t
     try:
         shell = " ".join(
             [
-                'export NVM_DIR="/root/.nvm";',
-                'source "$NVM_DIR/nvm.sh" 2>/dev/null || true;',
-                "openclaw",
-                "agent",
-                "--agent",
-                shlex.quote(OPENCLAW_AGENT),
-                "--session-id",
-                shlex.quote(session_id),
-                "--message",
+                shlex.quote(str(hermes_bin)),
+                "--profile",
+                shlex.quote(hermes_profile),
+                "chat",
+                "-Q",
+                "-q",
                 f'"$(cat {shlex.quote(str(prompt_path))})"',
-                "--json",
             ]
         )
         result = run_command(["bash", "-lc", shell], cwd=project_root, timeout=timeout, check=False)
@@ -162,7 +159,8 @@ def dispatch_openclaw_task(project_root: Path, context: dict, timeout: int) -> t
         prompt_path.unlink(missing_ok=True)
 
     payload = {
-        "agent": OPENCLAW_AGENT,
+        "runtime": "hermes",
+        "profile": hermes_profile,
         "sessionId": session_id,
         "returncode": result.returncode,
         "stdout": result.stdout,
@@ -171,7 +169,7 @@ def dispatch_openclaw_task(project_root: Path, context: dict, timeout: int) -> t
 
     if result.returncode != 0:
         raise RunnerError(
-            f"OpenClaw agent failed ({result.returncode}) for agent={OPENCLAW_AGENT} session={session_id}.\n"
+            f"Hermes agent failed ({result.returncode}) for profile={hermes_profile} session={session_id}.\n"
             f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         )
 
@@ -182,12 +180,12 @@ def dispatch_openclaw_task(project_root: Path, context: dict, timeout: int) -> t
         except json.JSONDecodeError:
             parsed = None
         if parsed is not None:
-            extracted = extract_openclaw_text(parsed).strip()
+            extracted = extract_agent_text(parsed).strip()
             if extracted:
                 output_text = extracted
 
     if not output_text:
-        raise RunnerError(f"OpenClaw agent returned empty output for agent={OPENCLAW_AGENT} session={session_id}.")
+        raise RunnerError(f"Hermes agent returned empty output for profile={hermes_profile} session={session_id}.")
 
     return payload, output_text
 
@@ -209,7 +207,7 @@ def extract_json_block(text: str) -> dict:
     if start >= 0 and end > start:
         return json.loads(text[start : end + 1])
 
-    raise RunnerError("Could not find a JSON draft object in OpenClaw agent output.")
+    raise RunnerError("Could not find a JSON draft object in Hermes agent output.")
 
 
 def frontmatter_value(value: object) -> str:
@@ -224,7 +222,7 @@ def build_markdown(draft: dict) -> str:
 
     body = str(draft.get("body", "")).strip()
     if not body:
-        raise RunnerError("OpenClaw draft JSON did not include a body.")
+        raise RunnerError("Hermes draft JSON did not include a body.")
 
     return "\n".join(
         [
@@ -282,10 +280,10 @@ def send_failure_notification(error: Exception) -> None:
             [
                 "CounterUAVHub Blog Automation Failed",
                 "",
-                "Stage: OpenClaw Beidou draft generation or validation",
+                "Stage: Hermes default/Beidou draft generation or validation",
                 f"Reason: {summarize_error(str(error))}",
                 "",
-                "Next action: check OpenClaw main/Beidou model credentials on the cloud server, then rerun counteruavhub-blog-review.service.",
+                "Next action: check Hermes default profile credentials on the cloud server, then rerun counteruavhub-blog-review.service.",
             ]
         ),
         file=sys.stderr,
@@ -328,6 +326,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--project-root", type=Path, default=DEFAULT_PROJECT_ROOT)
     parser.add_argument("--status-dir", type=Path, default=DEFAULT_STATUS_DIR)
+    parser.add_argument("--hermes-bin", type=Path, default=HERMES_BIN)
+    parser.add_argument("--hermes-profile", default=HERMES_PROFILE)
     parser.add_argument("--timeout", type=int, default=900)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--skip-agent", action="store_true")
@@ -372,7 +372,7 @@ def main() -> int:
                 },
                 args.status_dir,
             )
-            print("Dry run or --skip-agent selected; no OpenClaw agent task, draft write, or build performed.")
+            print("Dry run or --skip-agent selected; no Hermes agent task, draft write, or build performed.")
             print(f"Status file: {status_path}")
             return 0
 
@@ -383,12 +383,19 @@ def main() -> int:
                 "stage": "agent",
                 "candidateCount": len(candidates),
                 "candidates": candidates[:5],
-                "agent": OPENCLAW_AGENT,
+                "runtime": "hermes",
+                "profile": args.hermes_profile,
             },
             args.status_dir,
         )
-        payload, agent_output = dispatch_openclaw_task(project_root, context, timeout=args.timeout)
-        print(f"OpenClaw agent completed agent={payload.get('agent')} session={payload.get('sessionId')}")
+        payload, agent_output = dispatch_hermes_task(
+            project_root,
+            context,
+            timeout=args.timeout,
+            hermes_bin=args.hermes_bin,
+            hermes_profile=args.hermes_profile,
+        )
+        print(f"Hermes agent completed profile={payload.get('profile')} session={payload.get('sessionId')}")
 
         write_status(
             project_root,
@@ -396,7 +403,8 @@ def main() -> int:
                 "status": "running",
                 "stage": "draft_write",
                 "candidateCount": len(candidates),
-                "agent": payload.get("agent"),
+                "runtime": payload.get("runtime"),
+                "profile": payload.get("profile"),
                 "sessionId": payload.get("sessionId"),
             },
             args.status_dir,
@@ -436,7 +444,8 @@ def main() -> int:
                 "review": draft.get("review") or {},
                 "validation": validation,
                 "buildChecked": build_checked,
-                "agent": payload.get("agent"),
+                "runtime": payload.get("runtime"),
+                "profile": payload.get("profile"),
                 "sessionId": payload.get("sessionId"),
             },
             args.status_dir,

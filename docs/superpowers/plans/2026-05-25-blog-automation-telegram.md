@@ -2,11 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a server-side CounterUAVHub blog draft workflow that asks OpenClaw `main`（北斗）to generate technical article drafts, validates them, writes a machine-readable status file, and prints a review summary without auto-publishing to `main`.
+**Goal:** Build a server-side CounterUAVHub blog draft workflow that asks Hermes `default` profile to generate technical article drafts, validates them, writes a machine-readable status file, and prints a review summary without auto-publishing to `main`.
 
-**Architecture:** Project-local Node scripts build deterministic topic context and validate Markdown drafts. A server runner in `scripts/server/` orchestrates OpenClaw 北斗 Agent invocation, draft extraction, validation, optional build checks, `var/blog-automation/status.json`, `var/blog-automation/history.jsonl`, and stdout/journal review summary. OpenClaw core service files remain unchanged.
+**Architecture:** Project-local Node scripts build deterministic topic context and validate Markdown drafts. A server runner in `scripts/server/` orchestrates Hermes `default` profile invocation, draft extraction, validation, optional build checks, `var/blog-automation/status.json`, `var/blog-automation/history.jsonl`, and stdout/journal review summary. Hermes/OpenClaw core service files remain unchanged.
 
-**Tech Stack:** Node.js ESM, `node:test`, `gray-matter`, Python 3.11, OpenClaw CLI, existing Next.js build.
+**Tech Stack:** Node.js ESM, `node:test`, `gray-matter`, Python 3.11, Hermes CLI, existing Next.js build.
 
 ---
 
@@ -44,7 +44,7 @@ Expected: PASS.
 
 - [ ] **Step 1: Implement runner**
 
-The runner should support `--dry-run`, `--skip-agent`, `--skip-build`, `--timeout`, and `--status-dir`. Telegram notification is out of scope for the current version.
+The runner should support `--dry-run`, `--skip-agent`, `--skip-build`, `--timeout`, `--status-dir`, `--hermes-bin`, and `--hermes-profile`. Telegram notification is out of scope for the current version.
 
 - [ ] **Step 2: Verify syntax and dry-run**
 
