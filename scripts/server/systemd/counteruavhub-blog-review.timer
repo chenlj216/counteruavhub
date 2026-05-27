@@ -1,0 +1,11 @@
+[Unit]
+Description=Run CounterUAVHub Beidou blog draft review twice weekly
+
+[Timer]
+OnCalendar=Mon,Thu *-*-* 09:30:00
+RandomizedDelaySec=30m
+Persistent=true
+Unit=counteruavhub-blog-review.service
+
+[Install]
+WantedBy=timers.target

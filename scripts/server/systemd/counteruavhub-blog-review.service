@@ -1,0 +1,11 @@
+[Unit]
+Description=CounterUAVHub Beidou blog draft review
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/.openclaw/workspace/projects/counteruavhub
+Environment=PYTHONUNBUFFERED=1
+Environment=NVM_DIR=/root/.nvm
+ExecStart=/usr/bin/python3 /root/.openclaw/workspace/projects/counteruavhub/scripts/server/blog-draft-review-runner.py

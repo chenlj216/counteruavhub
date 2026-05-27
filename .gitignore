@@ -25,6 +25,7 @@ yarn-error.log*
 
 # Runtime data
 pids/
+var/
 *.pid
 *.seed
 *.pid.lock
@@ -37,6 +38,7 @@ coverage/
 .npm
 .eslintcache
 node_repl_history
+__pycache__/
 
 # Database / backups
 backups/
